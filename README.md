@@ -1,0 +1,1 @@
+Projekat iz predmeta Specifikacija i Modeliranje Softvera
