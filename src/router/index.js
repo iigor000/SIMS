@@ -63,6 +63,13 @@ const router = createRouter({
       name: "login",
       component: () => import("../views/LoginView.vue"),
     },
+    // Item view route - handles songs, artists, bands, performances, albums
+    {
+      path: "/item/:type/:id",
+      name: "item",
+      component: () => import("../views/ItemView.vue"),
+      meta: { requiresAuth: true },
+    },
   ],
 });
 
