@@ -19,6 +19,12 @@ const router = createRouter({
       component: () => import("../views/AboutView.vue"),
       meta: { requiresAuth: true },
     },
+        {
+      path: "/item/:type/:id",
+      name: "item-details",
+      component: () => import("../views/ItemDetailsView.vue"),
+      // NEMA requiresAuth - neulogovani mogu da vide recenzije
+    },
     // Admin routes
     {
       path: "/manage-users",
@@ -31,6 +37,18 @@ const router = createRouter({
       name: "settings",
       component: () => import("../views/AdminDashboard.vue"),
       meta: { requiresAuth: true, requiredRole: 'admin' },
+    },
+        {
+      path: "/moderation",
+      name: "moderation",
+      component: () => import("../views/ModerationView.vue"),
+      meta: { requiresAuth: true, requiredRole: ['editor', 'admin'] },
+    },
+        {
+      path: "/edit-review/:reviewId",
+      name: "edit-review",
+      component: () => import("../views/EditReviewView.vue"),
+      meta: { requiresAuth: true },
     },
     // Editor routes
     {
@@ -46,6 +64,12 @@ const router = createRouter({
       meta: { requiresAuth: true, requiredRole: 'editor' },
     },
     // User routes
+        {
+      path: "/my-reviews",
+      name: "my-reviews",
+      component: () => import("../views/MyReviewsView.vue"),
+      meta: { requiresAuth: true },
+    },
     {
       path: "/profile",
       name: "profile",
@@ -88,18 +112,24 @@ router.beforeEach((to, from, next) => {
 
           // Check if user is deleted
           if (userData && userData.deleted) {
-            // User is deleted, sign them out
             await auth.signOut();
             next('/login');
             return;
           }
 
-          // Check role if required
           if (requiredRole) {
-            if (userData && userData.role === requiredRole) {
+            // Ako je requiredRole array (['editor', 'admin'])
+            if (Array.isArray(requiredRole)) {
+              if (userData && requiredRole.includes(userData.role)) {
+                next();
+              } else {
+                next('/');
+              }
+            } 
+            // Ako je single role string ('admin', 'editor', 'user')
+            else if (userData && userData.role === requiredRole) {
               next();
             } else {
-              // User doesn't have required role, redirect to home
               next('/');
             }
           } else {

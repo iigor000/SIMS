@@ -36,11 +36,11 @@ const { user, userRole } = useAuth();
         <p>Create, edit, and publish content.</p>
         <div class="quick-actions">
           <RouterLink to="/content" class="action-card">
-            <h3>� Manage Content</h3>
+            <h3>Manage Content</h3>
             <p>Create and edit content</p>
           </RouterLink>
           <RouterLink to="/publish" class="action-card">
-            <h3>🚀 Publish</h3>
+            <h3>Publish</h3>
             <p>Publish and manage content</p>
           </RouterLink>
         </div>
@@ -52,11 +52,11 @@ const { user, userRole } = useAuth();
         <p>Access your profile and view your dashboard.</p>
         <div class="quick-actions">
           <RouterLink to="/profile" class="action-card">
-            <h3>� My Profile</h3>
+            <h3>My Profile</h3>
             <p>View and edit your profile</p>
           </RouterLink>
           <RouterLink to="/dashboard" class="action-card">
-            <h3>� Dashboard</h3>
+            <h3>Dashboard</h3>
             <p>View your personal dashboard</p>
           </RouterLink>
         </div>

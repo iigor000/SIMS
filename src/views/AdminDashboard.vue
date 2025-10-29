@@ -20,14 +20,35 @@
         <h2>Reports</h2>
         <p>View and generate system-wide reports.</p>
       </div>
+
+      <div class="card">
+  <h2>Editor Reviews Pending Approval</h2>
+
+  <div v-if="editorReviews.length === 0">Nema recenzija za odobravanje</div>
+
+  <div v-for="review in editorReviews" :key="review.id" class="review-card">
+    <p><strong>{{ review.authorName }}</strong> (Editor)</p>
+    <p>{{ review.content }}</p>
+    <button @click="approveReview(review.id)">✔️ Odobri</button>
+    <button @click="rejectReview(review.id)">❌ Odbij</button>
+  </div>
+</div>
+
     </div>
   </div>
 </template>
 
 <script setup>
-import { useAuth } from '../composables/useAuth';
+import { onMounted } from 'vue'
+import { useAuth } from '../composables/useAuth'
+import { useAdminModeration } from '@/composables/useAdminModeration'
 
-const { user } = useAuth();
+const { user } = useAuth()
+const { editorReviews, loadEditorReviews, approveReview, rejectReview } = useAdminModeration()
+
+onMounted(async () => {
+  await loadEditorReviews()
+})
 </script>
 
 <style scoped>
