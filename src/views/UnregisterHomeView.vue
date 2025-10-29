@@ -2,6 +2,7 @@
 import { ref, computed, onMounted } from "vue";
 import { get, child, ref as dbRef } from "firebase/database";
 import { db } from "@/firebase/config";
+import { useAuth } from "@/composables/useAuth";
 
 // generic items list (will fetch from /items)
 const items = ref([]);
