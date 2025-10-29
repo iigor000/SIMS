@@ -16,7 +16,7 @@
       </router-link>
       
       <!-- Dodaj novi sadržaj -->
-      <router-link to="/content" class="card link-card">
+      <router-link to="/content/add" class="card link-card">
         <h2>📝 Dodaj Sadržaj</h2>
         <p>Dodaj nove albume, pesme ili izvođače.</p>
       </router-link>

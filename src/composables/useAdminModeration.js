@@ -2,7 +2,7 @@ import { ref } from 'vue'
 import { useReviews } from './useReviews'
 import { useUserStore } from '@/stores/user'
 
-export function useModeration() {
+/*export function useModeration() {
   const { 
     getPendingReviews, 
     approveReview, 
@@ -152,4 +152,4 @@ export function useModeration() {
     searchPendingReviews,
     filterByItemType
   }
-}
+}*/

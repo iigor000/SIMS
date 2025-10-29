@@ -10,8 +10,9 @@ const router = createRouter({
     {
       path: "/",
       name: "home",
-      component: HomeView,
-      meta: { requiresAuth: true },
+      component: () => import("../views/UnregisterHomeView.vue"),
+      // component: HomeView,
+      // meta: { requiresAuth: true },
     },
     {
       path: "/about",
@@ -56,6 +57,12 @@ const router = createRouter({
       name: "content",
       component: () => import("../views/EditorDashboard.vue"),
       meta: { requiresAuth: true, requiredRole: 'editor' },
+    },
+    {
+      path: "/content/add",
+      name: "add-item",
+      component: () => import("../views/AddItemView.vue"),
+      meta: { requiresAuth: true, requiredRole: ['editor', 'admin'] },
     },
     {
       path: "/publish",
