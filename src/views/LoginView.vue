@@ -249,64 +249,76 @@ const handleSubmit = async () => {
   display: flex;
   justify-content: center;
   align-items: center;
-  padding: 20px;
+  padding: 20px 12px;
   background: #1c1c1c;
 }
 
 .auth-card {
-  background: white;
-  padding: 40px;
-  border-radius: 12px;
-  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+  /* smaller translucent purple glass card that can scroll vertically */
+  background: rgba(99,102,241,0.06);
+  padding: 24px;
+  border-radius: 10px;
+  box-shadow: 0 10px 24px rgba(75,66,160,0.08);
   width: 100%;
-  max-width: 400px;
+  max-width: 360px; /* make it smaller */
+  border: 1px solid rgba(124,58,237,0.14);
+  backdrop-filter: blur(8px);
 }
 
 h1 {
   text-align: center;
-  margin-bottom: 30px;
-  color: #333;
+  margin-bottom: 20px;
+  color: #f3e5f5;
+  font-size: 1.4rem;
 }
 
 .form-group {
-  margin-bottom: 20px;
+  margin-bottom: 14px;
 }
 
 label {
   display: block;
   margin-bottom: 8px;
   font-weight: 600;
-  color: #555;
+  color: rgba(255,255,255,0.9);
 }
 
 input,
 select {
   width: 100%;
-  padding: 12px;
-  border: 1px solid #ddd;
-  border-radius: 6px;
+  padding: 10px;
+  border: 1px solid rgba(255,255,255,0.08);
+  border-radius: 8px;
   font-size: 14px;
-  transition: border-color 0.3s;
+  transition: border-color 0.2s, box-shadow 0.12s;
   box-sizing: border-box;
+  background: rgba(255,255,255,0.03);
+  color: rgba(255,255,255,0.95);
 }
 
 input:focus,
 select:focus {
   outline: none;
-  border-color: #4CAF50;
+  border-color: rgba(124,58,237,0.9);
+  box-shadow: 0 4px 18px rgba(124,58,237,0.08);
+}
+
+input::placeholder,
+select::placeholder {
+  color: rgba(255,255,255,0.6);
 }
 
 .btn-primary {
   width: 100%;
-  padding: 12px;
-  background: #6a1b9a;
+  padding: 10px;
+  background: #7c3aed;
   color: white;
   border: none;
   border-radius: 6px;
-  font-size: 16px;
+  font-size: 15px;
   font-weight: 600;
   cursor: pointer;
-  transition: background 0.3s;
+  transition: background 0.22s, transform 0.08s;
 }
 
 .btn-primary:hover:not(:disabled) {

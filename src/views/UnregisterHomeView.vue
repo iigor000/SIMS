@@ -99,7 +99,7 @@ const highlightMatch = (text) => {
 <template>
   <div class="page-bg">
     <div class="home">
-              <h1>🎵 Dobrodošli 🎵</h1>
+              <h1> Dobrodošli </h1>
 
 
       <!-- Popular hits of the week (horizontal) -->
@@ -109,10 +109,19 @@ const highlightMatch = (text) => {
         <div class="scroll-wrap">
           <button class="scroll-btn left" aria-label="Scroll left" @click="scrollContainer(genreListRef, -1)">‹</button>
           <div class="genre-list" ref="genreListRef">
-            <div v-for="g in genres" :key="g.id" class="genre-card" :style="{ background: `linear-gradient(135deg, ${g.from}, ${g.to})` }">
+            <div
+              v-for="g in genres"
+              :key="g.id"
+              class="genre-card"
+              :style="{ background: `linear-gradient(135deg, ${g.from}, ${g.to})` }"
+              role="button"
+              tabindex="0"
+              @click="filterByGenre(g)"
+              @keydown.enter.prevent="filterByGenre(g)"
+              @keydown.space.prevent="filterByGenre(g)"
+            >
               <div class="genre-meta">
                 <div class="genre-name">{{ g.name }}</div>
-                <button class="genre-btn" @click.prevent="filterByGenre(g)">Prikaži</button>
               </div>
             </div>
           </div>
@@ -184,8 +193,8 @@ const highlightMatch = (text) => {
 <style scoped>
 .home {
   max-width: 900px;
-  margin: 2rem auto;
-  padding: 2rem;
+  margin: 1rem auto; /* move content up */
+  padding: 1rem; /* tighter card padding */
   text-align: center;
 }
 
@@ -195,7 +204,7 @@ const highlightMatch = (text) => {
   display: flex;
   align-items: flex-start;
   justify-content: center;
-  padding: 3rem 1rem;
+  padding: 1.5rem 1rem; /* reduce top space */
 }
 
 .home { /* ensure text contrasts on purple background */
@@ -206,7 +215,7 @@ const highlightMatch = (text) => {
   display: flex;
   flex-direction: column;
   align-items: center;
-  gap: 1rem;
+  gap: 0.75rem;
   color: #fff;
 }
 
@@ -238,7 +247,7 @@ h2 {
 }
 .search-input::placeholder { color: rgba(255,255,255,0.75); }
 .popular {
-  margin-bottom: 1.5rem;
+  margin-bottom: 1rem;
   text-align: left;
 }
 .popular h2 {
@@ -318,7 +327,7 @@ h2 {
 .genre-list::-webkit-scrollbar, .popular-list::-webkit-scrollbar { display: none; height: 0; }
 
 .genres {
-  margin-bottom: 1.25rem;
+  margin-bottom: 0.75rem;
   text-align: left;
 }
 .genres h2 {
@@ -341,6 +350,8 @@ h2 {
   padding: 0.75rem;
   box-shadow: 0 4px 10px rgba(0,0,0,0.15);
   position: relative;
+  cursor: pointer;
+  transition: transform 0.12s ease, box-shadow 0.12s ease;
 }
 
 /* subtle purple overlay to tint genre gradients without losing image/gradient */
@@ -361,22 +372,18 @@ h2 {
 .genre-name {
   font-weight: 700;
 }
-.genre-btn {
-  background: rgba(255,255,255,0.9);
-  color: #333;
-  border: none;
-  padding: 0.35rem 0.6rem;
-  border-radius: 8px;
-  cursor: pointer;
-  font-weight: 600;
+.genre-card:hover {
+  transform: translateY(-4px);
+  box-shadow: 0 8px 22px rgba(0,0,0,0.2);
 }
-.genre-btn:hover {
-  background: white;
+.genre-card:focus {
+  outline: 3px solid rgba(124,58,237,0.18);
+  outline-offset: 2px;
 }
 
 
 .songs {
-  margin-top: 2rem;
+  margin-top: 1.25rem;
   text-align: left;
 }
 .song-list {

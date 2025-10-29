@@ -42,7 +42,7 @@
                   class="btn-delete"
                   title="Delete user"
                 >
-                  🗑️ Obriši
+                  Obriši
                 </button>
               </td>
             </tr>
@@ -179,6 +179,7 @@ const newUser = ref({
   displayName: '',
   role: ''
 });
+
 
 // Fetch all users
 const fetchUsers = async () => {
