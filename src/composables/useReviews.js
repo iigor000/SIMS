@@ -12,21 +12,37 @@ import {
   limitToFirst
 } from 'firebase/database'
 import { db } from '@/firebase/config'
+import { useUserStore } from '@/stores/user' 
 
 export function useReviews() {
   const reviews = ref([])
   const loading = ref(false)
+   const error = ref(null)
+const userStore = useUserStore()
 
-  // 🔹 SUBMIT NEW REVIEW
   const submitReview = async (reviewData) => {
     try {
-        const auth = getAuth()
-        const currentUser = auth.currentUser
-        if (!currentUser) throw new Error('Korisnik nije prijavljen')
+      error.value = null
+      loading.value = true
+      
+      const auth = getAuth()
+      const currentUser = auth.currentUser
+      if (!currentUser) throw new Error('Korisnik nije prijavljen')
+      
+      // Use computed userRole from store
+      const userRole = userStore.userRole
+      
+      console.log('User role for review submission:', userRole)
+      console.log('Is Editor:', userStore.isEditor)
+      
       const reviewWithMetadata = {
         ...reviewData,
         userId: currentUser.uid,
-        status: reviewData.userRole === 'editor' ? 'approved' : 'pending',
+        userDisplayName: currentUser.displayName || currentUser.email,
+        authorRole: userRole, // 'user', 'editor', ili 'admin'
+        // Editors get auto-approved, but need admin review
+        // Users need editor approval
+        status: userRole === 'editor' ? 'editor-approved' : 'pending',
         createdAt: Date.now(),
         updatedAt: Date.now(),
         viewCount: 0
@@ -35,61 +51,70 @@ export function useReviews() {
       const reviewsRef = dbRef(db, 'reviews')
       const newReviewRef = push(reviewsRef)
       await update(newReviewRef, reviewWithMetadata)
-      return newReviewRef.key
-    } catch (error) {
-      console.error('Error submitting review:', error)
-      throw new Error('Greška pri slanju recenzije')
-    }
-  }
-
-  // 🔹 GET REVIEWS FOR SPECIFIC ITEM
-  const getItemReviews = async (itemId, itemsLimit = 10) => {
-    try {
-      loading.value = true
-
-      const reviewsRef = dbRef(db, 'reviews')
-      const q = query(
-        reviewsRef,
-        orderByChild('itemId'),
-        equalTo(itemId),
-        limitToFirst(itemsLimit)
-      )
-
-      const snapshot = await get(q)
-      const reviewsList = []
       
-      if (snapshot.exists()) {
-        snapshot.forEach((childSnapshot) => {
-          const review = childSnapshot.val()
-          // Filter only approved reviews
-          if (review.status === 'approved') {
-            reviewsList.push({
-              id: childSnapshot.key,
-              ...review,
-              createdAt: new Date(review.createdAt)
-            })
-          }
-        })
-        
-        // Sort by date (newest first)
-        reviewsList.sort((a, b) => b.createdAt - a.createdAt)
-      }
-
-      const hasMore = reviewsList.length === itemsLimit
-
       return {
-        reviews: reviewsList,
-        hasMore
+        success: true,
+        reviewId: newReviewRef.key,
+        review: {
+          id: newReviewRef.key,
+          ...reviewWithMetadata
+        }
       }
-    } catch (error) {
-      console.error('Error fetching item reviews:', error)
-      throw new Error('Greška pri učitavanju recenzija')
+    } catch (err) {
+      console.error('Error submitting review:', err)
+      error.value = err.message
+      throw new Error('Greška pri slanju recenzije')
     } finally {
       loading.value = false
     }
   }
 
-  // 🔹 GET USER'S REVIEWS
+const getItemReviews = async (itemId, itemsLimit = 10) => {
+  try {
+    loading.value = true
+
+    const reviewsRef = dbRef(db, 'reviews')
+    const q = query(
+      reviewsRef,
+      orderByChild('itemId'),
+      equalTo(itemId),
+      limitToFirst(itemsLimit)
+    )
+
+    const snapshot = await get(q)
+    const reviewsList = []
+    
+    if (snapshot.exists()) {
+      snapshot.forEach((childSnapshot) => {
+        const review = childSnapshot.val()
+        // Filter only fully approved reviews
+        if (review.status === 'approved') {
+          reviewsList.push({
+            id: childSnapshot.key,
+            ...review,
+            createdAt: new Date(review.createdAt)
+          })
+        }
+      })
+      
+      // Sort by date (newest first)
+      reviewsList.sort((a, b) => b.createdAt - a.createdAt)
+    }
+
+    const hasMore = reviewsList.length === itemsLimit
+
+    return {
+      reviews: reviewsList,
+      hasMore
+    }
+  } catch (error) {
+    console.error('Error fetching item reviews:', error)
+    throw new Error('Greška pri učitavanju recenzija')
+  } finally {
+    loading.value = false
+  }
+}
+
   const getUserReviews = async (userId, status = 'all') => {
     try {
       loading.value = true
@@ -129,50 +154,51 @@ export function useReviews() {
     }
   }
 
-  // 🔹 GET PENDING REVIEWS FOR MODERATION
-  const getPendingReviews = async (limitCount = 20) => {
-    try {
-      loading.value = true
 
-      const reviewsRef = dbRef(db, 'reviews')
-      const q = query(
-        reviewsRef,
-        orderByChild('status'),
-        equalTo('pending')
-      )
+const getPendingReviews = async (limitCount = 20) => {
+  try {
+    loading.value = true
 
-      const snapshot = await get(q)
-      const pendingReviews = []
-      
-      if (snapshot.exists()) {
-        snapshot.forEach((childSnapshot) => {
-          const review = childSnapshot.val()
+    const reviewsRef = dbRef(db, 'reviews')
+    const q = query(
+      reviewsRef,
+      orderByChild('status'),
+      equalTo('pending')
+    )
+
+    const snapshot = await get(q)
+    const pendingReviews = []
+    
+    if (snapshot.exists()) {
+      snapshot.forEach((childSnapshot) => {
+        const review = childSnapshot.val()
+        // Samo recenzije običnih korisnika (ne editora)
+        if (review.authorRole === 'user' || !review.authorRole) {
           pendingReviews.push({
             id: childSnapshot.key,
             ...review,
             createdAt: new Date(review.createdAt)
           })
-        })
-        
-        // Sort by date (oldest first for moderation)
-        pendingReviews.sort((a, b) => a.createdAt - b.createdAt)
-        
-        // Apply limit
-        if (limitCount) {
-          return pendingReviews.slice(0, limitCount)
         }
+      })
+      
+      // Sort by date (oldest first for moderation)
+      pendingReviews.sort((a, b) => a.createdAt - b.createdAt)
+      
+      // Apply limit
+      if (limitCount) {
+        return pendingReviews.slice(0, limitCount)
       }
-
-      return pendingReviews
-    } catch (error) {
-      console.error('Error fetching pending reviews:', error)
-      throw new Error('Greška pri učitavanju recenzija za moderaciju')
-    } finally {
-      loading.value = false
     }
-  }
 
-  // 🔹 APPROVE REVIEW
+    return pendingReviews
+  } catch (error) {
+    console.error('Error fetching pending reviews:', error)
+    throw new Error('Greška pri učitavanju recenzija za moderaciju')
+  } finally {
+    loading.value = false
+  }
+}
   const approveReview = async (reviewId, moderatorId) => {
     try {
       const reviewRef = dbRef(db, `reviews/${reviewId}`)
@@ -188,7 +214,6 @@ export function useReviews() {
     }
   }
 
-  // 🔹 REJECT REVIEW
   const rejectReview = async (reviewId, moderatorId, reason = '') => {
     try {
       const reviewRef = dbRef(db, `reviews/${reviewId}`)
@@ -205,7 +230,6 @@ export function useReviews() {
     }
   }
 
-  // 🔹 DELETE REVIEW
   const deleteReview = async (reviewId) => {
     try {
       const reviewRef = dbRef(db, `reviews/${reviewId}`)
@@ -217,7 +241,6 @@ export function useReviews() {
     }
   }
 
-  // 🔹 UPDATE REVIEW
   const updateReview = async (reviewId, updateData) => {
     try {
       const reviewRef = dbRef(db, `reviews/${reviewId}`)
@@ -232,34 +255,33 @@ export function useReviews() {
     }
   }
 
-  // 🔹 GET REVIEW STATISTICS
-  const getReviewStats = async (itemId) => {
+    const getReviewStats = async (itemId) => {
     try {
-      const reviews = await fetchReviews(itemId) // niz recenzija
-const totalReviews = reviews.length
-const averageRating = reviews.reduce((sum, r) => sum + r.rating, 0) / totalReviews
+      const { reviews } = await getItemReviews(itemId)
+      const totalReviews = reviews.length
+      const averageRating = totalReviews > 0 ? (reviews.reduce((sum, r) => sum + r.rating, 0) / totalReviews) : 0
 
-const ratingDistribution = {}
-for (let i = 1; i <= 5; i++) {
-  ratingDistribution[i] = reviews.filter(r => Math.round(r.rating) === i).length
-}
+      const ratingDistribution = {}
+      for (let i = 1; i <= 5; i++) {
+        ratingDistribution[i] = reviews.filter(r => Math.round(r.rating) === i).length
+      }
 
-const mediaTypeBreakdown = {}
-reviews.forEach(r => {
-  if (!mediaTypeBreakdown[r.mediaType]) {
-    mediaTypeBreakdown[r.mediaType] = { count: 0, averageRating: 0 }
-  }
-  const mt = mediaTypeBreakdown[r.mediaType]
-  mt.count++
-  mt.averageRating += r.rating
-})
-// finalno srediti averageRating po tipu
-for (const mt in mediaTypeBreakdown) {
-  mediaTypeBreakdown[mt].averageRating /= mediaTypeBreakdown[mt].count
-}
+      const mediaTypeBreakdown = {}
+      reviews.forEach(r => {
+        if (!mediaTypeBreakdown[r.mediaType]) {
+          mediaTypeBreakdown[r.mediaType] = { count: 0, averageRating: 0 }
+        }
+        const mt = mediaTypeBreakdown[r.mediaType]
+        mt.count++
+        mt.averageRating += r.rating
+      })
+      for (const mt in mediaTypeBreakdown) {
+        mediaTypeBreakdown[mt].averageRating = mediaTypeBreakdown[mt].count > 0
+          ? mediaTypeBreakdown[mt].averageRating / mediaTypeBreakdown[mt].count
+          : 0
+      }
 
-return { totalReviews, averageRating, ratingDistribution, mediaTypeBreakdown }
-
+      return { totalReviews, averageRating, ratingDistribution, mediaTypeBreakdown }
     } catch (error) {
       console.error('Error calculating review stats:', error)
       throw new Error('Greška pri računanju statistika')
@@ -269,6 +291,7 @@ return { totalReviews, averageRating, ratingDistribution, mediaTypeBreakdown }
   return {
     reviews,
     loading,
+    error,
     submitReview,
     getItemReviews,
     getUserReviews,

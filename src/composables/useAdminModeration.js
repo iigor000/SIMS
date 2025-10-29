@@ -1,155 +1,124 @@
 import { ref } from 'vue'
-import { useReviews } from './useReviews'
+import { 
+  ref as dbRef, 
+  get, 
+  update,
+  query,
+  orderByChild,
+  equalTo
+} from 'firebase/database'
+import { db } from '@/firebase/config'
 import { useUserStore } from '@/stores/user'
 
-/*export function useModeration() {
-  const { 
-    getPendingReviews, 
-    approveReview, 
-    rejectReview,
-  } = useReviews()
-  
+export function useAdminModeration() {
   const userStore = useUserStore()
+  const editorReviews = ref([])
+  const loading = ref(false)
+  const error = ref(null)
 
-  const pendingReviews = ref([])
-  const moderationLoading = ref(false)
-  const moderationStats = ref({
-    pendingCount: 0,
-    approvedToday: 0,
-    rejectedToday: 0
-  })
-
-  // 🔹 LOAD PENDING REVIEWS
-  const loadPendingReviews = async () => {
+  const loadEditorReviews = async () => {
     try {
-      moderationLoading.value = true
-      pendingReviews.value = await getPendingReviews(50)
+      loading.value = true
+      error.value = null
       
-      // Update stats
-      moderationStats.value.pendingCount = pendingReviews.value.length
-    } catch (error) {
-      console.error('Error loading pending reviews:', error)
-      throw error
-    } finally {
-      moderationLoading.value = false
-    }
-  }
-
-  // 🔹 BULK APPROVE REVIEWS
-  const bulkApproveReviews = async (reviewIds) => {
-    try {
-      moderationLoading.value = true
-      const results = []
+      const reviewsRef = dbRef(db, 'reviews')
       
-      for (const reviewId of reviewIds) {
-        try {
-          await approveReview(reviewId, userStore.user.uid)
-          results.push({ id: reviewId, status: 'success' })
-        } catch (error) {
-          results.push({ id: reviewId, status: 'error', error: error.message })
-        }
-      }
-      
-      // Remove approved reviews from local state
-      pendingReviews.value = pendingReviews.value.filter(
-        review => !reviewIds.includes(review.id)
+      // Query za recenzije koje su napisali editori i imaju status 'editor-approved'
+      const q = query(
+        reviewsRef,
+        orderByChild('status'),
+        equalTo('editor-approved')
       )
-      
-      return results
-    } catch (error) {
-      console.error('Error in bulk approve:', error)
-      throw error
-    } finally {
-      moderationLoading.value = false
-    }
-  }
 
-  // 🔹 BULK REJECT REVIEWS
-  const bulkRejectReviews = async (reviewIds, reason = '') => {
-    try {
-      moderationLoading.value = true
-      const results = []
+      const snapshot = await get(q)
+      const reviews = []
       
-      for (const reviewId of reviewIds) {
-        try {
-          await rejectReview(reviewId, userStore.user.uid, reason)
-          results.push({ id: reviewId, status: 'success' })
-        } catch (error) {
-          results.push({ id: reviewId, status: 'error', error: error.message })
-        }
+      if (snapshot.exists()) {
+        snapshot.forEach((childSnapshot) => {
+          const review = childSnapshot.val()
+          // Dodatna provera da je autor stvarno editor
+          if (review.authorRole === 'editor') {
+            reviews.push({
+              id: childSnapshot.key,
+              ...review,
+              createdAt: new Date(review.createdAt)
+            })
+          }
+        })
+        
+        // Sort by date (oldest first)
+        reviews.sort((a, b) => a.createdAt - b.createdAt)
       }
-      
-      // Remove rejected reviews from local state
-      pendingReviews.value = pendingReviews.value.filter(
-        review => !reviewIds.includes(review.id)
-      )
-      
-      return results
-    } catch (error) {
-      console.error('Error in bulk reject:', error)
-      throw error
+
+      editorReviews.value = reviews
+      return reviews
+    } catch (err) {
+      console.error('Error fetching editor reviews:', err)
+      error.value = 'Greška pri učitavanju editor recenzija'
+      throw new Error('Greška pri učitavanju editor recenzija')
     } finally {
-      moderationLoading.value = false
+      loading.value = false
     }
   }
 
-  // 🔹 GET MODERATION STATISTICS
-  const loadModerationStats = async () => {
+  // 🔹 APPROVE EDITOR REVIEW (by Admin)
+  const approveReview = async (reviewId) => {
     try {
-      // This would typically fetch from a dedicated stats collection
-      // For now, we'll calculate from pending reviews
-      const today = new Date()
-      today.setHours(0, 0, 0, 0)
+      const reviewRef = dbRef(db, `reviews/${reviewId}`)
+      await update(reviewRef, {
+        status: 'approved', // Finalno odobrenje
+        adminApprovedBy: userStore.user?.uid,
+        adminApprovedAt: Date.now()
+      })
       
-      // Count approved/rejected today (this is simplified)
-      // In a real app, you'd query Firestore for today's actions
-      moderationStats.value.approvedToday = 0
-      moderationStats.value.rejectedToday = 0
-      
-    } catch (error) {
-      console.error('Error loading moderation stats:', error)
+      // Remove from local state
+      editorReviews.value = editorReviews.value.filter(r => r.id !== reviewId)
+      return true
+    } catch (err) {
+      console.error('Error approving editor review:', err)
+      throw new Error('Greška pri odobravanju editor recenzije')
     }
   }
 
-  // 🔹 SEARCH PENDING REVIEWS
-  const searchPendingReviews = async (searchTerm) => {
-    if (!searchTerm.trim()) {
-      await loadPendingReviews()
-      return
+  const rejectReview = async (reviewId, reason = '') => {
+    try {
+      const reviewRef = dbRef(db, `reviews/${reviewId}`)
+      await update(reviewRef, {
+        status: 'admin-rejected',
+        adminRejectedBy: userStore.user?.uid,
+        adminRejectedAt: Date.now(),
+        adminRejectionReason: reason
+      })
+      
+      // Remove from local state
+      editorReviews.value = editorReviews.value.filter(r => r.id !== reviewId)
+      return true
+    } catch (err) {
+      console.error('Error rejecting editor review:', err)
+      throw new Error('Greška pri odbijanju editor recenzije')
     }
-
-    const filtered = pendingReviews.value.filter(review => 
-      review.itemName?.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      review.userDisplayName?.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      review.title?.toLowerCase().includes(searchTerm.toLowerCase())
-    )
-
-    pendingReviews.value = filtered
   }
 
-  // 🔹 FILTER BY ITEM TYPE
-  const filterByItemType = async (itemType) => {
-    if (!itemType) {
-      await loadPendingReviews()
-      return
+  // 🔹 GET STATS
+  const getEditorReviewStats = async () => {
+    try {
+      const stats = {
+        pending: editorReviews.value.length,
+      }
+      return stats
+    } catch (err) {
+      console.error('Error getting stats:', err)
+      return { pending: 0 }
     }
-
-    const filtered = pendingReviews.value.filter(review => 
-      review.itemType === itemType
-    )
-
-    pendingReviews.value = filtered
   }
 
   return {
-    pendingReviews,
-    moderationLoading,
-    moderationStats,
-    loadPendingReviews,
-    bulkApproveReviews,
-    bulkRejectReviews,
-    loadModerationStats,
-    searchPendingReviews,
-    filterByItemType
+    editorReviews,
+    loading,
+    error,
+    loadEditorReviews,
+    approveReview,
+    rejectReview,
+    getEditorReviewStats
   }
-}*/
+}

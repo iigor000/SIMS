@@ -174,8 +174,6 @@ onMounted(() => {
 watch(
   () => props.mediaType,
   () => {
-    // We could implement separate filtering or refetch
-    // For now, we'll just use computed filteredReviews
   }
 )
 

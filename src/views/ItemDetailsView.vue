@@ -20,8 +20,7 @@
           <p class="item-type-badge">{{ getItemTypeLabel(itemType) }}</p>
         </div>
         
-        <!-- Review Stats -->
-        <ReviewStats :itemId="itemId" :itemType="itemType" />
+        
       </div>
 
       <!-- Item Details Section -->
