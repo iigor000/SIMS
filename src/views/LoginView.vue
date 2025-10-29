@@ -299,7 +299,7 @@ select:focus {
 .btn-primary {
   width: 100%;
   padding: 12px;
-  background: #4CAF50;
+  background: #6a1b9a;
   color: white;
   border: none;
   border-radius: 6px;
@@ -310,7 +310,7 @@ select:focus {
 }
 
 .btn-primary:hover:not(:disabled) {
-  background: #45a049;
+  background: #8142a8;
 }
 
 .btn-primary:disabled {
@@ -338,7 +338,7 @@ select:focus {
 }
 
 .toggle-mode a {
-  color: #4CAF50;
+  color: #6a1b9a;
   text-decoration: none;
   font-weight: 600;
   cursor: pointer;

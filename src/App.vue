@@ -23,14 +23,12 @@ const { user, userRole, logout } = useAuth();
           <!-- User specific links -->
           <RouterLink v-if="userRole === 'user'" to="/dashboard">Dashboard</RouterLink>
           
-          <!-- Profile link for all users -->
-          <RouterLink to="/profile">My Profile</RouterLink>
-          
-          <RouterLink to="/about">About</RouterLink>
+          <!-- Profile link moved into user-section (displayed as user name) -->
           
           <div class="user-section">
-            <span class="user-role" v-if="userRole">{{ userRole.toUpperCase() }}</span>
-            <span class="user-name">{{ user.displayName || user.email }}</span>
+            <!-- hide the role badge when role is exactly 'user' -->
+            <span class="user-role" v-if="userRole && userRole !== 'user'">{{ userRole.toUpperCase() }}</span>
+            <RouterLink to="/profile" class="user-name">{{ user.displayName || user.email || 'Profile' }}</RouterLink>
             <button @click="logout" class="logout-btn">Logout</button>
           </div>
         </nav>
@@ -48,13 +46,18 @@ const { user, userRole, logout } = useAuth();
   min-height: 100vh;
   width: 100%;
 }
+/* make the app container background match UnregisterHomeView */
+#app-container {
+  background: rgb(37, 36, 36);
+}
 
 header {
   line-height: 1.5;
   padding: 0.5rem;
-  background: #baffca;
-  border-bottom: 1px solid #1f752b;
+  background: linear-gradient(90deg, #6a1b9a 0%, #ca54eb 100%);
+  border-bottom: 1px solid #4a0072;
   width: 100%;
+  color: #fff;
 }
 
 .wrapper {
@@ -66,36 +69,36 @@ nav {
   display: flex;
   align-items: center;
   justify-content: center;
-  gap: 2rem;
+  gap: 1rem; /* reduced gap so Home and Dashboard are closer */
   font-size: 1rem;
 }
 
 nav a {
   text-decoration: none;
-  color: #333;
+  color: rgba(255,255,255,0.95);
   padding: 0.5rem 1rem;
   border-radius: 4px;
-  transition: background 0.3s;
+  transition: background 0.2s, color 0.2s;
 }
 
 nav a:hover {
-  background: rgba(76, 175, 80, 0.1);
+  background: rgba(255,255,255,0.06);
 }
 
 nav a.router-link-exact-active {
-  color: #4CAF50;
-  font-weight: 600;
+  color: #e1bee7;
+  font-weight: 700;
 }
 
 .user-section {
   margin-left: auto;
   display: flex;
   align-items: center;
-  gap: 1rem;
+  gap: 0.75rem;
 }
 
 .user-role {
-  background: #4CAF50;
+  background: #7e57c2;
   color: white;
   padding: 0.25rem 0.75rem;
   border-radius: 12px;
@@ -104,23 +107,29 @@ nav a.router-link-exact-active {
 }
 
 .user-name {
-  color: #555;
-  font-weight: 500;
+  color: #fff;
+  font-weight: 600;
+  text-decoration: none;
+  padding: 0.25rem 0.5rem;
+}
+.user-name:hover {
+  color: #f3e5f5;
 }
 
 .logout-btn {
-  padding: 0.5rem 1rem;
-  background: #f44336;
+  padding: 0.45rem 0.9rem;
+  background: #080808;
   color: white;
   border: none;
   border-radius: 4px;
   cursor: pointer;
   font-size: 14px;
-  transition: background 0.3s;
+  transition: background 0.2s, transform 0.08s;
 }
 
 .logout-btn:hover {
   background: #d32f2f;
+  transform: translateY(-1px);
 }
 
 @media (max-width: 768px) {
