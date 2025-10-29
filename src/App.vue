@@ -15,6 +15,7 @@ const { user, userRole, logout } = useAuth();
           <!-- Admin specific links -->
           <RouterLink v-if="userRole === 'admin'" to="/manage-users">Manage Users</RouterLink>
           <RouterLink v-if="userRole === 'admin'" to="/settings">Settings</RouterLink>
+          <RouterLink v-if="userRole === 'admin'" to="/content/add">Add new items</RouterLink>
           
           <!-- Editor specific links -->
           <RouterLink v-if="userRole === 'editor'" to="/content">Manage Content</RouterLink>

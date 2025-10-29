@@ -14,7 +14,7 @@
       </router-link>
       
       <!-- NOVO: Pretraga muzike -->
-      <router-link to="/search" class="card link-card">
+      <router-link to="/" class="card link-card">
         <h2>🔍 Pretraži Muziku</h2>
         <p>Pronađi nove albume, pesme i izvođače.</p>
       </router-link>

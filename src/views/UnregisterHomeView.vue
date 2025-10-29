@@ -2,22 +2,58 @@
 import { ref, computed, onMounted } from "vue";
 import { getDatabase, ref as dbRef, get, child } from "firebase/database";
 import { db } from "@/firebase/config";
+import { useAuth } from "@/composables/useAuth";
 
+const { user } = useAuth();
 const songs = ref([]);
 const loading = ref(true);
 const searchQuery = ref("");
 
-// Fetch songs from Firebase
+const parsePerformer = (performerId) => {
+  if (!performerId || typeof performerId !== "string" || !performerId.includes(":"))
+    return null;
+  const [type, id] = performerId.split(":");
+  return { type, id };
+};
+
+const fetchPerformerName = async (performerId) => {
+  const parsed = parsePerformer(performerId);
+  if (!parsed) return null;
+
+  try {
+    const performerRef = child(dbRef(db), `items/${parsed.type}/${parsed.id}`);
+    const snapshot = await get(performerRef);
+    if (snapshot.exists()) {
+      const data = snapshot.val();
+      return data.name || null;
+    }
+  } catch (error) {
+    console.error("Greška pri učitavanju izvođača:", error);
+  }
+  return null;
+};
+
 onMounted(async () => {
   try {
     const snapshot = await get(child(dbRef(db), "items/song"));
     if (snapshot.exists()) {
       const data = snapshot.val();
-      songs.value = Object.entries(data).map(([id, value]) => ({
+      const songsArray = Object.entries(data).map(([id, value]) => ({
         id,
-        ...value
+        ...value,
       }));
-      songs.value.sort((a, b) => b.postedDate - a.postedDate);
+
+      for (const song of songsArray) {
+        if (song.performerId) {
+          const performerName = await fetchPerformerName(song.performerId);
+          song.performerName = performerName;
+          const parsed = parsePerformer(song.performerId);
+          song.performerType = parsed?.type || null;
+          song.performerKey = parsed?.id || null;
+        }
+      }
+
+      songs.value = songsArray.sort((a, b) => b.postedDate - a.postedDate);
     }
   } catch (error) {
     console.error("Greška pri učitavanju pesama:", error);
@@ -26,23 +62,22 @@ onMounted(async () => {
   }
 });
 
-// Computed filter
 const filteredSongs = computed(() => {
   if (!searchQuery.value.trim()) return songs.value;
 
   const q = searchQuery.value.toLowerCase();
-  return songs.value.filter(song => {
+  return songs.value.filter((song) => {
     const nameMatch = song.name?.toLowerCase().includes(q);
-    const artistMatch = song.songwriters?.[0]?.name?.toLowerCase().includes(q);
-    return nameMatch || artistMatch;
+    const performerMatch = song.performerName?.toLowerCase().includes(q);
+    const songwriterMatch = song.songwriters?.[0]?.name?.toLowerCase().includes(q);
+    return nameMatch || performerMatch || songwriterMatch;
   });
 });
 
-// Function for highlighting matched text
 const highlightMatch = (text) => {
-  if (!searchQuery.value) return text;
+  if (!text || !searchQuery.value) return text;
   const regex = new RegExp(`(${searchQuery.value})`, "gi");
-  return text.replace(regex, '<mark>$1</mark>');
+  return text.replace(regex, "<mark>$1</mark>");
 };
 </script>
 
@@ -55,10 +90,10 @@ const highlightMatch = (text) => {
         <input
           v-model="searchQuery"
           type="text"
-          placeholder="🔍 Pretraži pesmu ili izvođača..."
+          placeholder="🔍 Pretraži pesmu, izvođača ili bend..."
           class="search-input"
         />
-        <RouterLink to="/login" class="login-btn">Prijava</RouterLink>
+        <RouterLink v-if="!user" to="/login" class="login-btn">Prijava</RouterLink>
       </div>
     </header>
 
@@ -69,16 +104,22 @@ const highlightMatch = (text) => {
 
       <div v-else-if="filteredSongs.length > 0" class="song-list">
         <div v-for="song in filteredSongs" :key="song.id" class="song-card">
+          <!-- Naziv pesme -->
           <RouterLink
             :to="`/item/song/${song.id}`"
             class="song-title"
             v-html="highlightMatch(song.name)"
           ></RouterLink>
+
+          <!-- Izvođač (ime iz baze) -->
           <p class="artist">
-            <RouterLink
-              :to="`/item/artist/${song.songwriters?.[0]?.id}`"
-              v-html="highlightMatch(song.songwriters?.[0]?.name || 'Nepoznati autor')"
-            ></RouterLink>
+            <template v-if="song.performerName && song.performerType && song.performerKey">
+              <RouterLink
+                :to="`/item/${song.performerType === 'band' ? 'band' : 'artist'}/${song.performerKey}`"
+                v-html="highlightMatch(song.performerName)"
+              ></RouterLink>
+            </template>
+            <span v-else> Nepoznati izvođač</span>
           </p>
         </div>
       </div>
