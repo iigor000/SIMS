@@ -253,18 +253,23 @@ h2 {
 }
 .popular-card {
   min-width: 200px;
-  background: rgba(255,255,255,0.04); /* translucent glass */
+  /* translucent purple glass */
+  background: rgba(124,58,237,0.10);
   color: #fff;
   padding: 0.9rem 1.1rem;
   border-radius: 10px;
-  box-shadow: 0 8px 30px rgba(0,0,0,0.45);
+  box-shadow: 0 10px 30px rgba(84,63,215,0.12);
   flex: 0 0 auto;
-  border: 1px solid rgba(255,255,255,0.06);
-  backdrop-filter: blur(6px);
+  border: 1px solid rgba(124,58,237,0.20); /* purple border */
+  backdrop-filter: blur(8px);
+}
+.popular-card:hover {
+  box-shadow: 0 14px 40px rgba(124,58,237,0.12), 0 0 0 4px rgba(124,58,237,0.06);
+  transform: translateY(-4px);
 }
 .popular-title {
   font-weight: 700;
-  color: #d7bfff; /* soft purple accent */
+  color: #efd9ff; /* soft purple accent */
   text-decoration: none;
 }
 .popular-artist {
@@ -337,6 +342,16 @@ h2 {
   box-shadow: 0 4px 10px rgba(0,0,0,0.15);
   position: relative;
 }
+
+/* subtle purple overlay to tint genre gradients without losing image/gradient */
+.genre-card::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  border-radius: 12px;
+  background: linear-gradient(rgba(124,58,237,0.10), rgba(124,58,237,0.06));
+  pointer-events: none;
+}
 .genre-meta {
   display: flex;
   justify-content: space-between;
@@ -370,17 +385,22 @@ h2 {
   gap: 1rem;
 }
 .song-card {
-  background: rgba(255,255,255,0.03); /* translucent glass */
+  /* translucent purple glass for song cards */
+  background: rgba(99,102,241,0.06);
   padding: 1rem 1.5rem;
   border-radius: 10px;
-  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.45);
-  border: 1px solid rgba(255,255,255,0.04);
-  backdrop-filter: blur(6px);
+  box-shadow: 0 8px 24px rgba(75,66,160,0.10);
+  border: 1px solid rgba(124,58,237,0.18); /* purple border */
+  backdrop-filter: blur(7px);
   color: #fff;
+}
+.song-card:hover {
+  box-shadow: 0 12px 32px rgba(124,58,237,0.10), 0 0 0 3px rgba(124,58,237,0.05);
+  transform: translateY(-3px);
 }
 .song-title {
   font-weight: bold;
-  color: #fff;
+  color: #f3e6ff;
   text-decoration: none;
   font-size: 1.1rem;
 }

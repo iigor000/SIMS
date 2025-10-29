@@ -87,13 +87,14 @@ onMounted(async () => {
 }
 
 .card {
-  background: rgba(250, 248, 248, 0.06); /* translucent card */
+  /* translucent purple glass for user dashboard cards */
+  background: rgba(99,102,241,0.06);
   padding: 2rem;
   border-radius: 12px;
-  box-shadow: 0 6px 18px rgba(0, 0, 0, 0.35);
+  box-shadow: 0 8px 22px rgba(75,66,160,0.10);
   position: relative;
-  border: 1px solid rgba(255,255,255,0.06);
-  backdrop-filter: blur(6px);
+  border: 1px solid rgba(124,58,237,0.22); /* stronger purple border */
+  backdrop-filter: blur(8px);
 }
 
 .link-card {
@@ -105,7 +106,7 @@ onMounted(async () => {
 
 .link-card:hover {
   transform: translateY(-2px);
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+  box-shadow: 0 10px 30px rgba(124,58,237,0.10), 0 6px 18px rgba(0,0,0,0.12);
 }
 
 .card h2 {
@@ -123,7 +124,7 @@ onMounted(async () => {
   position: absolute;
   top: 1rem;
   right: 1rem;
-  background: #007bff;
+  background: rgba(124,58,237,0.9);
   color: white;
   padding: 0.25rem 0.5rem;
   border-radius: 12px;

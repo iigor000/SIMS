@@ -13,12 +13,12 @@ const { user, userRole, logout } = useAuth();
           <RouterLink to="/">Home</RouterLink>
           
           <!-- Admin specific links -->
-          <RouterLink v-if="userRole === 'admin'" to="/manage-users">Manage Users</RouterLink>
-          <RouterLink v-if="userRole === 'admin'" to="/settings">Settings</RouterLink>
+          <RouterLink v-if="userRole === 'admin'" to="/manage-users">Korisnici</RouterLink>
+          <RouterLink v-if="userRole === 'admin'" to="/settings">Podešavanja</RouterLink>
           
           <!-- Editor specific links -->
-          <RouterLink v-if="userRole === 'editor'" to="/content">Manage Content</RouterLink>
-          <RouterLink v-if="userRole === 'editor'" to="/publish">Publish</RouterLink>
+          <RouterLink v-if="userRole === 'editor'" to="/content">Upravljanje sadržajem</RouterLink>
+          <RouterLink v-if="userRole === 'editor'" to="/publish">Objavi</RouterLink>
           
           <!-- User specific links -->
           <RouterLink v-if="userRole === 'user'" to="/dashboard">Dashboard</RouterLink>
