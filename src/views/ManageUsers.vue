@@ -97,15 +97,45 @@
               />
             </div>
 
-            <div class="form-group">
-              <label for="newRole">Uloga</label>
-              <select id="newRole" v-model="newUser.role" required>
-                <option value="" disabled>Izaberi ulogu</option>
-                <option value="user">Korisnik</option>
-                <option value="editor">Editor</option>
-                <option value="admin">Admin</option>
-              </select>
-            </div>
+                  <div class="form-group">
+                    <label for="newRole">Uloga</label>
+
+                    <!-- Custom themed select to avoid native white dropdowns -->
+                    <div class="custom-select" ref="roleSelectRef">
+                      <button
+                        type="button"
+                        class="custom-select__trigger"
+                        @click="toggleRoleDropdown"
+                        @keydown="onRoleKeydown"
+                        :aria-expanded="showRoleDropdown"
+                        aria-haspopup="listbox"
+                      >
+                        <span>{{ roleLabel(newUser.role) }}</span>
+                        <span class="arrow">▾</span>
+                      </button>
+
+                      <ul
+                        v-if="showRoleDropdown"
+                        class="custom-select__options"
+                        role="listbox"
+                        tabindex="-1"
+                      >
+                        <li
+                          v-for="opt in roleOptions"
+                          :key="opt.value"
+                          class="custom-select__option"
+                          @click="selectRole(opt.value)"
+                          @keydown.enter.prevent="selectRole(opt.value)"
+                          tabindex="0"
+                        >
+                          {{ opt.label }}
+                        </li>
+                      </ul>
+
+                      <!-- keep a hidden input so native form validation still works -->
+                      <input type="hidden" id="newRole" v-model="newUser.role" required />
+                    </div>
+                  </div>
 
             <div v-if="modalError" class="error-message">
               {{ modalError }}
@@ -158,7 +188,7 @@
 </template>
 
 <script setup>
-import { ref, onMounted } from 'vue';
+import { ref, onMounted, onBeforeUnmount } from 'vue';
 import { ref as dbRef, get, set, remove } from 'firebase/database';
 import { createUserWithEmailAndPassword, updateProfile, signOut } from 'firebase/auth';
 import { auth, secondaryAuth, db } from '../firebase/config';
@@ -320,9 +350,57 @@ const formatDate = (dateString) => {
   return date.toLocaleDateString() + ' ' + date.toLocaleTimeString();
 };
 
+// Role select: custom themed dropdown (avoid native white popup)
+const roleOptions = [
+  { value: 'user', label: 'Korisnik' },
+  { value: 'editor', label: 'Editor' },
+  { value: 'admin', label: 'Admin' }
+];
+
+const showRoleDropdown = ref(false);
+const roleSelectRef = ref(null);
+
+const toggleRoleDropdown = () => {
+  showRoleDropdown.value = !showRoleDropdown.value;
+};
+
+const selectRole = (val) => {
+  newUser.value.role = val;
+  showRoleDropdown.value = false;
+};
+
+const roleLabel = (val) => {
+  if (!val) return 'Izaberi ulogu';
+  const opt = roleOptions.find(o => o.value === val);
+  return opt ? opt.label : val;
+};
+
+const onClickOutside = (e) => {
+  if (roleSelectRef.value && !roleSelectRef.value.contains(e.target)) {
+    showRoleDropdown.value = false;
+  }
+};
+
+const onRoleKeydown = (e) => {
+  if (e.key === 'ArrowDown' || e.key === 'ArrowUp') {
+    e.preventDefault();
+    showRoleDropdown.value = true;
+    // focus first option if available
+    const el = roleSelectRef.value?.querySelector('.custom-select__option');
+    if (el) el.focus();
+  } else if (e.key === 'Escape') {
+    showRoleDropdown.value = false;
+  }
+};
+
 // Load users on mount
 onMounted(() => {
   fetchUsers();
+  document.addEventListener('click', onClickOutside);
+});
+
+onBeforeUnmount(() => {
+  document.removeEventListener('click', onClickOutside);
 });
 </script>
 
@@ -501,13 +579,16 @@ tbody tr:hover {
 }
 
 .modal {
-  background: white;
+  /* solid purple modal to match app theme (not transparent) */
+  background: black;
   border-radius: 12px;
   width: 90%;
-  max-width: 500px;
+  max-width: 520px;
   max-height: 90vh;
   overflow-y: auto;
-  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3);
+  box-shadow: 0 12px 40px rgba(75,66,160,0.12);
+  border: 1px solid rgba(124,58,237,0.18);
+  color: #fff;
 }
 
 .modal-small {
@@ -518,22 +599,22 @@ tbody tr:hover {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  padding: 1.5rem;
-  border-bottom: 1px solid #e0e0e0;
+  padding: 1.25rem 1.5rem;
+  border-bottom: 1px solid rgba(255,255,255,0.04);
 }
 
 .modal-header h2 {
   margin: 0;
-  color: #333;
+  color: #f6ecff;
+  font-size: 1.25rem;
 }
-
 .close-btn {
-  background: none;
+  background: transparent;
   border: none;
-  font-size: 2rem;
-  color: #999;
+  font-size: 1.6rem;
+  color: rgba(255,255,255,0.8);
   cursor: pointer;
-  padding: 0;
+  padding: 0.1rem 0.25rem;
   width: 2rem;
   height: 2rem;
   display: flex;
@@ -543,15 +624,15 @@ tbody tr:hover {
 }
 
 .close-btn:hover {
-  color: #333;
+  color: #fff;
 }
 
 .modal-body {
-  padding: 1.5rem;
+  padding: 1.25rem 1.5rem 1.5rem 1.5rem;
 }
 
 .modal-body p {
-  color: #333;
+  color: rgba(255,255,255,0.9);
   font-size: 1rem;
   line-height: 1.5;
 }
@@ -564,23 +645,94 @@ tbody tr:hover {
   display: block;
   margin-bottom: 0.5rem;
   font-weight: 600;
-  color: #262626;
+  color: rgba(255,255,255,0.9);
 }
 
+.form-group input,
 .form-group input,
 .form-group select {
   width: 100%;
   padding: 0.75rem;
-  border: 1px solid #ddd;
-  border-radius: 6px;
+  border: 1px solid rgba(255,255,255,0.06);
+  border-radius: 8px;
   font-size: 1rem;
   box-sizing: border-box;
+  /* dark/purple background to match modal and avoid white dropdown */
+  background: linear-gradient(90deg, rgba(94,76,175,0.18), rgba(107,70,193,0.18));
+  color: rgba(255,255,255,0.95);
+  -webkit-appearance: none; /* help keep native white styles from showing */
+  appearance: none;
 }
+
+.form-group select option {
+  /* try to style the native options where supported */
+  background: linear-gradient(180deg, #6b46c1 0%, #7c3aed 100%);
+  color: #fff;
+}
+
+.form-group select:focus {
+  outline: none;
+  border-color: #5e4caf;
+  box-shadow: 0 0 8px rgba(94,76,175,0.25);
+}
+
+.form-group input::placeholder { color: rgba(255,255,255,0.5); }
 
 .form-group input:focus,
 .form-group select:focus {
   outline: none;
-  border-color: #4CAF50;
+  border-color: #5e4caf;
+  box-shadow: 0 0 8px rgba(94,76,175,0.18);
+}
+
+/* Custom select styles */
+.custom-select {
+  position: relative;
+}
+.custom-select__trigger {
+  width: 100%;
+  text-align: left;
+  padding: 0.52rem 0.6rem;
+  border-radius: 8px;
+  background: linear-gradient(90deg, rgba(94,76,175,0.22), rgba(107,70,193,0.22));
+  color: #fff;
+  border: 1px solid rgba(255,255,255,0.06);
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  cursor: pointer;
+  font-size: 0.95rem;
+}
+.custom-select__trigger .arrow {
+  margin-left: 0.75rem;
+  opacity: 0.95;
+}
+.custom-select__options {
+  position: absolute;
+  z-index: 2000;
+  top: calc(100% + 6px);
+  left: 0;
+  width: 100%;
+  background: linear-gradient(180deg, #6b46c1 0%, #7c3aed 100%);
+  border-radius: 8px;
+  box-shadow: 0 10px 30px rgba(75,66,160,0.18);
+  max-height: 180px;
+  overflow: auto;
+  list-style: none;
+  padding: 0.2rem 0;
+  margin: 0;
+  border: 1px solid rgba(124,58,237,0.18);
+}
+.custom-select__option {
+  padding: 0.48rem 0.75rem;
+  cursor: pointer;
+  color: #fff;
+  font-size: 0.95rem;
+}
+.custom-select__option:hover,
+.custom-select__option:focus {
+  background: rgba(255,255,255,0.04);
+  outline: none;
 }
 
 .modal-actions {
@@ -591,18 +743,19 @@ tbody tr:hover {
 }
 
 .btn-secondary {
-  background: #f5f5f5;
-  color: #333;
-  border: none;
+  background: rgba(255,255,255,0.06);
+  color: #fff;
+  border: 1px solid rgba(255,255,255,0.04);
   padding: 0.75rem 1.5rem;
-  border-radius: 6px;
+  border-radius: 8px;
   font-size: 1rem;
   cursor: pointer;
-  transition: background 0.3s;
+  transition: background 0.15s, transform 0.12s;
 }
 
 .btn-secondary:hover {
-  background: #e0e0e0;
+  background: rgba(255,255,255,0.09);
+  transform: translateY(-1px);
 }
 
 .btn-danger {
