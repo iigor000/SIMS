@@ -1,9 +1,10 @@
 <script setup>
-import { ref, computed, onMounted, onBeforeUnmount } from "vue";
-import { getDatabase, ref as dbRef, get, child } from "firebase/database";
+import { ref, computed, onMounted } from "vue";
+import { get, child, ref as dbRef } from "firebase/database";
 import { db } from "@/firebase/config";
 
-const songs = ref([]);
+// generic items list (will fetch from /items)
+const items = ref([]);
 const loading = ref(true);
 const searchQuery = ref("");
 const searchInput = ref(null);
@@ -16,15 +17,10 @@ function scrollContainer(containerRef, direction = 1) {
   const amount = Math.round(el.clientWidth * 0.7);
   const newScrollLeft = el.scrollLeft + direction * amount;
 
-  el.scrollTo({
-    left: newScrollLeft,
-    behavior: "smooth",
-  });
+  el.scrollTo({ left: newScrollLeft, behavior: "smooth" });
 }
 
-
-
-// simple genre gallery (name + color gradients). If you have images, replace gradient with `background-image`.
+// simple genre gallery
 const genres = ref([
   { id: 'pop', name: 'Pop', from: '#ff9a9e', to: '#fad0c4' },
   { id: 'rock', name: 'Rock', from: '#a18cd1', to: '#fbc2eb' },
@@ -33,71 +29,137 @@ const genres = ref([
   { id: 'jazz', name: 'Jazz', from: '#cfd9df', to: '#e2ebf0' }
 ]);
 
+const selectedGenre = ref(null);
+
 function filterByGenre(g) {
-  // for now, set the search query to the genre name as a quick filter
-  searchQuery.value = g.name;
-  // focus the input if available
+  // toggle selected genre
+  if (selectedGenre.value && selectedGenre.value.id === g.id) {
+    selectedGenre.value = null;
+    searchQuery.value = '';
+  } else {
+    selectedGenre.value = g;
+    searchQuery.value = g.name;
+  }
   if (searchInput.value && typeof searchInput.value.focus === 'function') {
     searchInput.value.focus();
   }
 }
 
-// Fetch songs from Firebase
+// Fetch all items from /items
 onMounted(async () => {
   try {
-    const snapshot = await get(child(dbRef(db), "items/song"));
+    const snapshot = await get(child(dbRef(db), "items"));
+    console.log('[UnregisterHome] fetched snapshot exists:', snapshot.exists());
+    console.log('[UnregisterHome] snapshot.val():', snapshot.val());
     if (snapshot.exists()) {
       const data = snapshot.val();
-      songs.value = Object.entries(data).map(([id, value]) => ({
-        id,
-        ...value
-      }));
-      songs.value.sort((a, b) => b.postedDate - a.postedDate);
+      const list = [];
+
+      // Data may be either a flat map of items or grouped by type (e.g. { song: { id: {...} }, artist: {...} })
+      for (const [key, value] of Object.entries(data)) {
+        if (value && typeof value === 'object') {
+          const isGroup = Object.values(value).some(v => v && typeof v === 'object' && (v.name || v.title || v.displayName || v.songwriters || v.author));
+          if (isGroup) {
+            // flatten group entries, record parent key as type
+            for (const [id, item] of Object.entries(value)) {
+              list.push({ id, type: key, ...(item || {}) });
+            }
+            continue;
+          }
+        }
+        // otherwise treat as single item
+        list.push({ id: key, ...(value || {}) });
+      }
+
+      items.value = list;
+      items.value.sort((a, b) => (b.postedDate || 0) - (a.postedDate || 0));
+    } else {
+      console.log('[UnregisterHome] No items found at /items');
+      items.value = [];
     }
-  } catch (error) {
-    console.error("Greška pri učitavanju pesama:", error);
+  } catch (err) {
+    console.error('Greška pri učitavanju itema:', err);
   } finally {
     loading.value = false;
   }
 });
 
-// Computed filter
-const filteredSongs = computed(() => {
-  if (!searchQuery.value.trim()) return songs.value;
-
+// computed lists
+const filteredItems = computed(() => {
+  if (!searchQuery.value.trim()) return items.value;
   const q = searchQuery.value.toLowerCase();
-  return songs.value.filter(song => {
-    const nameMatch = song.name?.toLowerCase().includes(q);
-    const artistMatch = song.songwriters?.[0]?.name?.toLowerCase().includes(q);
-    return nameMatch || artistMatch;
+  return items.value.filter(item => {
+    const name = (item.name || item.title || item.displayName || '').toString().toLowerCase();
+    const artist = (item.songwriters?.[0]?.name || item.author || '').toString().toLowerCase();
+    return name.includes(q) || artist.includes(q);
   });
 });
 
-// Compute most popular hits of the week (best-effort using available fields)
-const popularSongs = computed(() => {
-  const getPopularity = (s) => {
-    // use whichever metric exists; fallback to 0
-    return (
-      s.plays || s.playCount || s.views || s.popularity || s.rating || 0
-    );
-  };
-
-  return [...songs.value]
+const popularItems = computed(() => {
+  const getPopularity = (s) => (s.plays || s.playCount || s.views || s.popularity || s.rating || 0);
+  return [...items.value]
     .filter(Boolean)
+    // only include songs and performances in the popular strip
+    .filter(item => ['song', 'performance'].includes(getItemType(item)))
     .sort((a, b) => getPopularity(b) - getPopularity(a) || (b.postedDate || 0) - (a.postedDate || 0))
     .slice(0, 6);
 });
 
-// Function for highlighting matched text
+const pageBgStyle = computed(() => {
+  if (!selectedGenre.value) return { background: 'rgb(37, 36, 36)' };
+  const g = selectedGenre.value;
+  return { background: `linear-gradient(135deg, ${g.from}, ${g.to})` };
+});
+
 const highlightMatch = (text) => {
-  if (!searchQuery.value) return text;
+  if (!searchQuery.value) return text || '';
   const regex = new RegExp(`(${searchQuery.value})`, "gi");
-  return text.replace(regex, '<mark>$1</mark>');
+  return (text || '').toString().replace(regex, '<mark>$1</mark>');
+};
+
+// Determine a simple type label for display
+const getItemType = (item) => {
+  if (!item) return 'item';
+  const t = (item.type || '').toString().toLowerCase();
+  if (t) {
+    if (['album','artist','band','song','performance'].includes(t)) return t;
+    // common synonyms
+    if (t.includes('album')) return 'album';
+    if (t.includes('artist')) return 'artist';
+    if (t.includes('band')) return 'band';
+    if (t.includes('performance')) return 'performance';
+    if (t.includes('song') || t.includes('track')) return 'song';
+  }
+  // heuristics based on fields
+  if (item.songwriters) return 'song';
+  if (item.tracks || item.tracklist) return 'album';
+  if (item.members || item.bandName) return 'band';
+  if (item.isPerformance || item.venue) return 'performance';
+  if (item.displayName && !item.name) return 'artist';
+  return 'item';
+};
+
+const typeLabel = (item) => {
+  const t = getItemType(item);
+  switch (t) {
+    case 'album': return 'Album';
+    case 'artist': return 'Artist';
+    case 'band': return 'Band';
+    case 'song': return 'Song';
+    case 'performance': return 'Performance';
+    default: return 'Item';
+  }
+};
+
+const getArtistName = (item) => {
+  if (!item) return '';
+  // common places for artist/author
+  return item.songwriters?.[0]?.name || item.artist || item.author || '';
 };
 </script>
 
 <template>
-  <div class="page-bg">
+  <div class="page-bg" :style="pageBgStyle">
     <div class="home">
               <h1> Dobrodošli </h1>
 
@@ -129,18 +191,22 @@ const highlightMatch = (text) => {
         </div>
       </section>
 
-      <section v-if="popularSongs.length" class="popular">
+      <section v-if="popularItems.length" class="popular">
         <h2>Najpopularnije</h2>
         <div class="scroll-wrap">
           <button class="scroll-btn left" aria-label="Scroll left" @click="scrollContainer(popularListRef, -1)">‹</button>
           <div class="popular-list" ref="popularListRef">
-            <div v-for="song in popularSongs" :key="song.id" class="popular-card">
-              <RouterLink :to="`/item/song/${song.id}`" class="popular-title">
-                {{ song.name }}
+            <div v-for="item in popularItems" :key="item.id" class="popular-card">
+              <div class="popular-top">
+                <RouterLink :to="`/item/${item.type || 'song'}/${item.id}`" class="popular-title">
+                  {{ item.name || item.title || item.displayName || 'Bez naslova' }}
+                </RouterLink>
+                <span class="item-type">{{ typeLabel(item) }}</span>
+              </div>
+              <RouterLink v-if="item.songwriters?.[0]?.id" :to="`/item/artist/${item.songwriters?.[0]?.id}`" class="popular-artist">
+                {{ item.songwriters?.[0]?.name || item.author || 'Nepoznati autor' }}
               </RouterLink>
-              <RouterLink :to="`/item/artist/${song.songwriters?.[0]?.id}`" class="popular-artist">
-                {{ song.songwriters?.[0]?.name || 'Nepoznati autor' }}
-              </RouterLink>
+              <div v-else class="popular-artist">{{ item.author || '' }}</div>
             </div>
           </div>
           <button class="scroll-btn right" aria-label="Scroll right" @click="scrollContainer(popularListRef, 1)">›</button>
@@ -168,23 +234,28 @@ const highlightMatch = (text) => {
 
         <div v-if="loading" class="loading">Učitavanje...</div>
 
-        <div v-else-if="filteredSongs.length > 0" class="song-list">
-          <div v-for="song in filteredSongs" :key="song.id" class="song-card">
-            <RouterLink
-              :to="`/item/song/${song.id}`"
-              class="song-title"
-              v-html="highlightMatch(song.name)"
-            ></RouterLink>
-            <p class="artist">
+        <div v-else-if="filteredItems.length > 0" class="song-list">
+          <div v-for="item in filteredItems" :key="item.id" class="song-card">
+            <div class="song-top">
               <RouterLink
-                :to="`/item/artist/${song.songwriters?.[0]?.id}`"
-                v-html="highlightMatch(song.songwriters?.[0]?.name || 'Nepoznati autor')"
+                :to="`/item/${item.type || 'song'}/${item.id}`"
+                class="song-title"
+                v-html="highlightMatch(item.name || item.title || item.displayName || 'Bez naslova')"
               ></RouterLink>
+              <span class="item-type">{{ typeLabel(item) }}</span>
+            </div>
+            <p class="artist" v-if="item.songwriters?.[0]?.id || item.author">
+              <RouterLink
+                v-if="item.songwriters?.[0]?.id"
+                :to="`/item/artist/${item.songwriters?.[0]?.id}`"
+                v-html="highlightMatch(item.songwriters?.[0]?.name || item.author || 'Nepoznati autor')"
+              ></RouterLink>
+              <span v-else class="artist-text">{{ item.author || '' }}</span>
             </p>
           </div>
         </div>
 
-        <div v-else class="no-songs">Nema pesama koje se poklapaju 🎶</div>
+        <div v-else class="no-songs">Nema stavki koje se poklapaju 🎶</div>
       </section>
     </div>
   </div>
@@ -412,6 +483,23 @@ h2 {
   font-size: 1.1rem;
 }
 .song-title:hover { text-decoration: underline; }
+.song-top, .popular-top {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.75rem;
+}
+.item-type {
+  background: rgba(255,255,255,0.06);
+  color: #e9dbff;
+  padding: 0.22rem 0.5rem;
+  border-radius: 999px;
+  font-size: 0.75rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.6px;
+}
+.artist-text { color: #dcdcdc; }
 .artist {
   margin: 0.3rem 0 0 0;
   color: #cfcfcf;
@@ -428,7 +516,7 @@ h2 {
   color: #aaa;
 }
 mark {
-  background-color: #97ef87ff;
+  background-color: rgb(8, 8, 8);
   color: black;
   padding: 0 2px;
   border-radius: 3px;
