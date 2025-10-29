@@ -1,7 +1,8 @@
 <template>
-  <div class="dashboard">
+  <div class="page-bg">
+    <div class="dashboard">
     <div class="dashboard-header">
-      <h1>Muzički Dashboard</h1>
+      
       <p>Dobrodošao/la, {{ user?.displayName || user?.email }}</p>
     </div>
     
@@ -12,31 +13,14 @@
         <p>Pregledaj i uredi svoje recenzije albuma i pesama.</p>
         <span class="card-badge" v-if="userReviewsCount > 0">{{ userReviewsCount }}</span>
       </router-link>
-      
-      <!-- NOVO: Pretraga muzike -->
-      <router-link to="/" class="card link-card">
-        <h2>🔍 Pretraži Muziku</h2>
-        <p>Pronađi nove albume, pesme i izvođače.</p>
-      </router-link>
-      
+
       <!-- NOVO: Plejliste -->
       <div class="card">
         <h2>🎵 Moje Plejliste</h2>
         <p>Kreiraj i uredi svoje plejliste.</p>
         <button @click="createPlaylist" class="btn-secondary">Nova Plejlista</button>
-      </div>
-
-      <!-- NOVO: Preporuke -->
-      <router-link to="/item/album/-OcefTs91Ri4WfxE9dA6" class="card link-card">
-        <h2>🎧 Preporučeno</h2>
-        <p>Queen - A Night at the Opera. Oceni ovaj klasik!</p>
-      </router-link>
-
-      <!-- NOVO: Popularno -->
-      <router-link to="/item/song/-OcefTs91Ri4WfxE9dA3" class="card link-card">
-        <h2>🔥 Popularno</h2>
-        <p>Bohemian Rhapsody. Pročitaj recenzije drugih!</p>
-      </router-link>
+      </div>      
+    </div>
     </div>
   </div>
 </template>
@@ -51,11 +35,6 @@ const { loadUserReviews, userStats } = useUserReviews()
 
 const user = userStore.user
 const userReviewsCount = ref(0)
-
-const viewFavorites = () => {
-  // Implementiraj kasnije
-  alert('Funkcionalnost omiljenog će biti dostupna uskoro!')
-}
 
 const createPlaylist = () => {
   // Implementiraj kasnije  
@@ -72,6 +51,7 @@ onMounted(async () => {
 
 <style scoped>
 .dashboard {
+  
   max-width: 1200px;
   margin: 0 auto;
   padding: 2rem;
@@ -87,8 +67,17 @@ onMounted(async () => {
 }
 
 .dashboard-header p {
-  color: #666;
+  color: #fff;
   font-size: 1.1rem;
+}
+
+.page-bg {
+  min-height: 100vh;
+  background: rgb(37, 36, 36);
+  display: flex;
+  align-items: flex-start;
+  justify-content: center;
+  padding: 3rem 1rem;
 }
 
 .dashboard-content {
@@ -98,11 +87,14 @@ onMounted(async () => {
 }
 
 .card {
-  background: white;
+  /* translucent purple glass for user dashboard cards */
+  background: rgba(99,102,241,0.06);
   padding: 2rem;
-  border-radius: 8px;
-  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+  border-radius: 12px;
+  box-shadow: 0 8px 22px rgba(75,66,160,0.10);
   position: relative;
+  border: 1px solid rgba(124,58,237,0.22); /* stronger purple border */
+  backdrop-filter: blur(8px);
 }
 
 .link-card {
@@ -114,16 +106,16 @@ onMounted(async () => {
 
 .link-card:hover {
   transform: translateY(-2px);
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+  box-shadow: 0 10px 30px rgba(124,58,237,0.10), 0 6px 18px rgba(0,0,0,0.12);
 }
 
 .card h2 {
-  color: #333;
+  color: #fff;
   margin-bottom: 1rem;
 }
 
 .card p {
-  color: #666;
+  color: rgba(255,255,255,0.85);
   line-height: 1.6;
   margin-bottom: 1rem;
 }
@@ -132,7 +124,7 @@ onMounted(async () => {
   position: absolute;
   top: 1rem;
   right: 1rem;
-  background: #007bff;
+  background: rgba(124,58,237,0.9);
   color: white;
   padding: 0.25rem 0.5rem;
   border-radius: 12px;

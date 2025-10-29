@@ -7,7 +7,8 @@ const firebaseConfig = {
     authDomain: "sims-d133a.firebaseapp.com",
     databaseURL: "https://sims-d133a-default-rtdb.europe-west1.firebasedatabase.app",
     projectId: "sims-d133a",
-    storageBucket: "sims-d133a.firebasestorage.app",
+    // Use the standard .appspot.com bucket name (Firebase Console shows the correct storage bucket)
+    storageBucket: "sims-d133a.appspot.com",
     messagingSenderId: "492192158531",
     appId: "1:492192158531:web:b145b66fef8b0197e0d5f6",
     measurementId: "G-JRZRVLXRZ8"
