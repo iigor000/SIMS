@@ -81,9 +81,13 @@
 
           <!-- songwriters -->
           <div class="form-group">
-            <label>Songwriteri:</label>
-            <div v-for="(s, i) in formData.songwriters || []" :key="i">
-              <input v-model="s.name" placeholder="Ime songwritera" />
+            <label>Tekstopisci:</label>
+            <div v-for="(s, i) in formData.songwriters || []" :key="i" class="member-row">
+              <select v-model="s.id" class="select-dark" @change="onSongwriterSelect(i)">
+                <option value="">Izaberi tekstopisca</option>
+                <option v-for="a in artists" :key="a.id" :value="a.id">{{ a.name }}</option>
+              </select>
+              <button type="button" class="btn-small" @click="removeSongwriter(i)">Ukloni</button>
             </div>
             <button @click="addSongwriter" type="button">+ Dodaj songwritera</button>
           </div>
@@ -91,8 +95,12 @@
           <!-- producers -->
           <div class="form-group">
             <label>Producenti:</label>
-            <div v-for="(p, i) in formData.producers || []" :key="i">
-              <input v-model="p.name" placeholder="Ime producenta" />
+            <div v-for="(p, i) in formData.producers || []" :key="i" class="member-row">
+              <select v-model="p.id" class="select-dark" @change="onProducerSelect(i)">
+                <option value="">Izaberi producenta</option>
+                <option v-for="a in artists" :key="a.id" :value="a.id">{{ a.name }}</option>
+              </select>
+              <button type="button" class="btn-small" @click="removeProducer(i)">Ukloni</button>
             </div>
             <button @click="addProducer" type="button">+ Dodaj producenta</button>
           </div>
@@ -134,6 +142,32 @@
               <input v-model="formData.genres[i]" placeholder="npr. Rock" />
             </div>
             <button @click="addGenre" type="button">+ Dodaj žanr</button>
+          </div>
+          
+          <!-- songwriters for album -->
+          <div class="form-group">
+            <label>Tekstopisci:</label>
+            <div v-for="(s, i) in formData.songwriters || []" :key="'album-sw-'+i" class="member-row">
+              <select v-model="s.id" class="select-dark" @change="onSongwriterSelect(i)">
+                <option value="">Izaberi tekstopisca</option>
+                <option v-for="a in artists" :key="a.id" :value="a.id">{{ a.name }}</option>
+              </select>
+              <button type="button" class="btn-small" @click="removeSongwriter(i)">Ukloni</button>
+            </div>
+            <button @click="addSongwriter" type="button">+ Dodaj tekstopisca</button>
+          </div>
+
+          <!-- producers for album -->
+          <div class="form-group">
+            <label>Producenti:</label>
+            <div v-for="(p, i) in formData.producers || []" :key="'album-pr-'+i" class="member-row">
+              <select v-model="p.id" class="select-dark" @change="onProducerSelect(i)">
+                <option value="">Izaberi producenta</option>
+                <option v-for="a in artists" :key="a.id" :value="a.id">{{ a.name }}</option>
+              </select>
+              <button type="button" class="btn-small" @click="removeProducer(i)">Ukloni</button>
+            </div>
+            <button @click="addProducer" type="button">+ Dodaj producenta</button>
           </div>
         </template>
 
@@ -313,11 +347,35 @@ const addGenre = () => {
 };
 const addProducer = () => {
   if (!formData.value.producers) formData.value.producers = [];
-  formData.value.producers.push({ id: crypto.randomUUID(), name: "" });
+  formData.value.producers.push({ id: '', name: '' });
 };
 const addSongwriter = () => {
   if (!formData.value.songwriters) formData.value.songwriters = [];
-  formData.value.songwriters.push({ id: crypto.randomUUID(), name: "" });
+  formData.value.songwriters.push({ id: '', name: '' });
+};
+const removeProducer = (i) => formData.value.producers.splice(i, 1);
+const removeSongwriter = (i) => formData.value.songwriters.splice(i, 1);
+
+const onSongwriterSelect = (i) => {
+  const s = formData.value.songwriters[i];
+  if (!s) return;
+  if (s.id) {
+    const a = artists.value.find(x => x.id === s.id);
+    s.name = a ? a.name : '';
+  } else {
+    s.name = '';
+  }
+};
+
+const onProducerSelect = (i) => {
+  const p = formData.value.producers[i];
+  if (!p) return;
+  if (p.id) {
+    const a = artists.value.find(x => x.id === p.id);
+    p.name = a ? a.name : '';
+  } else {
+    p.name = '';
+  }
 };
 const addMember = () => {
   if (!formData.value.members) formData.value.members = [];
