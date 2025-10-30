@@ -6,25 +6,81 @@
     </div>
     
     <div class="dashboard-content">
-      <!-- System Overview Cards -->
-      
+      <!-- Dodela Zadataka Sekcija -->
+      <div class="tasks-section">
+        <div class="section-header-card">
+          <div class="header-content">
+            <h2>📝 Dodela Zadataka Urednicima</h2>
+            <p>Dodelite zadatke za pisanje recenzija urednicima</p>
+          </div>
+        </div>
+
+        <div class="assignment-form">
+          <div v-if="taskLoading" class="loading-message">
+            Učitavanje podataka...
+          </div>
+          
+          <template v-else>
+            <div class="form-group">
+              <label>Predmet:</label>
+              <select v-model="selectedItem" class="select-input">
+                <option value="">-- Izaberite predmet --</option>
+                <option v-for="item in items" :key="item.id" :value="item.id">
+                  {{ item.name || item.title || item.displayName || 'Bez naziva' }}
+                  {{ item.type ? ` (${item.type})` : '' }}
+                  {{ item.band?.name ? ` - ${item.band.name}` : '' }}
+                </option>
+              </select>
+              <div v-if="items.length === 0" class="helper-text">
+                Nema dostupnih predmeta
+              </div>
+            </div>
+
+            <div class="form-group">
+              <label>Urednik:</label>
+              <select v-model="selectedEditor" class="select-input">
+                <option value="">-- Izaberite urednika --</option>
+                <option v-for="editor in editors" :key="editor.id" :value="editor.id">
+                  {{ editor.displayName || editor.email }}
+                  {{ editor.role === 'editor' ? '(Urednik)' : '' }}
+                </option>
+              </select>
+              <div v-if="editors.length === 0" class="helper-text">
+                Nema dostupnih urednika
+              </div>
+            </div>
+          </template>
+
+          <div v-if="assignmentError" class="error-message">
+            {{ assignmentError }}
+          </div>
+
+          <button 
+            @click="handleAssignTask" 
+            class="assign-btn"
+            :disabled="taskLoading || !selectedItem || !selectedEditor"
+          >
+            {{ taskLoading ? 'Dodeljivanje...' : 'Dodeli zadatak' }}
+          </button>
+        </div>
+      </div>
 
       <!-- Editor Reviews Moderation Section -->
       <div class="moderation-section">
-          <div class="section-header-card">
-            <div class="header-content">
-              <h2>🛡️ Moderacija Editor Recenzija</h2>
-              <p>Pregledajte i odobrite recenzije koje su napisali editori</p>
-            </div>
-            <span class="count-badge" v-if="editorReviewsCount > 0">
-              {{ editorReviewsCount }}
-            </span>
-            <span class="urgent-badge" v-if="editorReviewsCount > 0">NOVO</span>
+        <div class="section-header-card">
+          <div class="header-content">
+            <h2>🛡️ Moderacija Editor Recenzija</h2>
+            <p>Pregledajte i odobrite recenzije koje su napisali editori</p>
           </div>
+          <span class="count-badge" v-if="editorReviewsCount > 0">
+            {{ editorReviewsCount }}
+          </span>
+          <span class="urgent-badge" v-if="editorReviewsCount > 0">NOVO</span>
+        </div>
 
         <EditorReviewsPending
           :editor-reviews="editorReviews"
-          :loading="loading"
+          :loading="moderationLoading"
           @approve="handleApprove"
           @reject="handleReject"
         />
@@ -37,16 +93,34 @@
 import { ref, computed, onMounted } from 'vue'
 import { useAuth } from '@/composables/useAuth'
 import { useAdminModeration } from '@/composables/useAdminModeration'
+import { useEditorTasks } from '@/composables/useEditorTasks'
 import EditorReviewsPending from '@/components/moderation/EditorReviewsPending.vue'
+import { db } from '@/firebase/config'
+import { ref as dbRef, get, query, orderByChild, equalTo } from 'firebase/database'
 
 const { user } = useAuth()
 const { 
   editorReviews, 
-  loading,
+  loading: moderationLoading,
   loadEditorReviews, 
   approveReview, 
   rejectReview 
 } = useAdminModeration()
+
+const {
+  loading: taskLoading,
+  error: taskError,
+  items,
+  editors,
+  loadItems,
+  loadEditors,
+  assignTask
+} = useEditorTasks()
+
+// State za dodelu zadataka
+const selectedItem = ref(null)
+const selectedEditor = ref(null)
+const assignmentError = ref('')
 
 const editorReviewsCount = computed(() => editorReviews.value.length)
 
@@ -71,8 +145,39 @@ const handleReject = async (reviewId) => {
   }
 }
 
+// Handler za dodelu zadatka
+const handleAssignTask = async () => {
+  if (!selectedItem.value || !selectedEditor.value) {
+    assignmentError.value = 'Molimo izaberite i sadržaj i urednika'
+    return
+  }
+
+  try {
+    assignmentError.value = ''
+    const item = items.value.find(i => i.id === selectedItem.value)
+    const editor = editors.value.find(e => e.id === selectedEditor.value)
+
+    await assignTask(
+      item.id,
+      editor.id,
+      item.name || item.title || 'Untitled',
+      editor.displayName || editor.email
+    )
+
+    alert('✅ Zadatak je uspešno dodeljen uredniku!')
+    selectedItem.value = null
+    selectedEditor.value = null
+  } catch (err) {
+    assignmentError.value = err.message
+  }
+}
+
 onMounted(async () => {
-  await loadEditorReviews()
+  await Promise.all([
+    loadEditorReviews(),
+    loadItems(),
+    loadEditors()
+  ])
 })
 </script>
 
@@ -202,6 +307,96 @@ onMounted(async () => {
   min-width: 50px;
   text-align: center;
   box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
+}
+
+.tasks-section {
+  margin-bottom: 2rem;
+}
+
+.assignment-form {
+  background: rgba(124, 58, 237, 0.1);
+  padding: 1.5rem;
+  border-radius: 12px;
+  margin-top: 1rem;
+}
+
+.form-group {
+  margin-bottom: 1.5rem;
+}
+
+.form-group label {
+  display: block;
+  margin-bottom: 0.5rem;
+  color: #ffffff;
+  font-weight: 500;
+}
+
+.select-input {
+  width: 100%;
+  padding: 0.75rem;
+  border-radius: 8px;
+  border: 1px solid rgba(124, 58, 237, 0.2);
+  background: rgba(124, 58, 237, 0.05);
+  color: #ffffff;
+  font-size: 1rem;
+}
+
+.select-input:focus {
+  outline: none;
+  border-color: rgba(124, 58, 237, 0.5);
+  box-shadow: 0 0 0 2px rgba(124, 58, 237, 0.1);
+}
+
+.select-input option {
+  background: #1a1a1a;
+  color: #ffffff;
+}
+
+.error-message {
+  color: #ef4444;
+  margin: 0.5rem 0;
+  padding: 0.5rem;
+  background: rgba(239, 68, 68, 0.1);
+  border-radius: 6px;
+}
+
+.assign-btn {
+  width: 100%;
+  padding: 0.75rem;
+  border-radius: 8px;
+  border: none;
+  background: rgba(124, 58, 237, 0.3);
+  color: #ffffff;
+  font-size: 1rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.assign-btn:hover:not(:disabled) {
+  background: rgba(124, 58, 237, 0.4);
+  transform: translateY(-1px);
+}
+
+.assign-btn:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.loading-message {
+  color: rgba(255, 255, 255, 0.8);
+  text-align: center;
+  padding: 1rem;
+  background: rgba(124, 58, 237, 0.1);
+  border-radius: 8px;
+  margin-bottom: 1rem;
+}
+
+.helper-text {
+  color: rgba(255, 255, 255, 0.6);
+  font-size: 0.9rem;
+  margin-top: 0.5rem;
+  font-style: italic;
 }
 
 .urgent-badge {
