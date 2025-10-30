@@ -7,30 +7,34 @@ const { user, userRole, logout } = useAuth();
 
 <template>
   <div id="app-container">
-    <header v-if="user">
+    <header>
       <div class="wrapper">
         <nav>
           <RouterLink to="/">Home</RouterLink>
-          
+
           <!-- Admin specific links -->
-          <RouterLink v-if="userRole === 'admin'" to="/manage-users">Manage Users</RouterLink>
-          <RouterLink v-if="userRole === 'admin'" to="/settings">Settings</RouterLink>
-          <RouterLink v-if="userRole === 'admin'" to="/content/add">Add new items</RouterLink>
-          
+          <RouterLink v-if="user && userRole === 'admin'" to="/manage-users">Manage Users</RouterLink>
+          <RouterLink v-if="user && userRole === 'admin'" to="/settings">Settings</RouterLink>
+          <RouterLink v-if="user && userRole === 'admin'" to="/content/add">Add new items</RouterLink>
+
           <!-- Editor specific links -->
-          <RouterLink v-if="userRole === 'editor'" to="/content">Upravljanje sadržajem</RouterLink>
-          <RouterLink v-if="userRole === 'editor'" to="/publish">Objavi</RouterLink>
-          
+          <RouterLink v-if="user && userRole === 'editor'" to="/content">Upravljanje sadržajem</RouterLink>
+          <RouterLink v-if="user && userRole === 'editor'" to="/publish">Objavi</RouterLink>
+
           <!-- User specific links -->
-          <RouterLink v-if="userRole === 'user'" to="/dashboard">Dashboard</RouterLink>
-          
-          <!-- Profile link moved into user-section (displayed as user name) -->
-          
+          <RouterLink v-if="user && userRole === 'user'" to="/dashboard">Dashboard</RouterLink>
+
+          <!-- Right side: show profile when logged, otherwise show login/register -->
           <div class="user-section">
-            <!-- hide the role badge when role is exactly 'user' -->
-            <span class="user-role" v-if="userRole && userRole !== 'user'">{{ userRole.toUpperCase() }}</span>
-            <RouterLink to="/profile" class="user-name">{{ user.displayName || user.email || 'Profile' }}</RouterLink>
-            <button @click="logout" class="logout-btn">Logout</button>
+            <template v-if="user">
+              <!-- hide the role badge when role is exactly 'user' -->
+              <span class="user-role" v-if="userRole && userRole !== 'user'">{{ userRole.toUpperCase() }}</span>
+              <RouterLink to="/profile" class="user-name">{{ user.displayName || user.email || 'Profile' }}</RouterLink>
+              <button @click="logout" class="logout-btn">Logout</button>
+            </template>
+            <template v-else>
+              <RouterLink to="/login" class="auth-link">Login</RouterLink>
+            </template>
           </div>
         </nav>
       </div>

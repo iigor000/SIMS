@@ -11,7 +11,7 @@
       <!-- izbor tipa -->
       <div class="form-group">
         <label>Tip sadržaja:</label>
-        <select v-model="itemType">
+  <select v-model="itemType" class="select-dark">
           <option disabled value="">-- Izaberi tip --</option>
           <option value="song">🎵 Pesma</option>
           <option value="album">💿 Album</option>
@@ -43,7 +43,7 @@
           <!-- bira se bend ili izvođač -->
           <div class="form-group">
             <label>Izvođač / Bend:</label>
-            <select v-model="formData.performerId">
+            <select v-model="formData.performerId" class="select-dark">
               <option value="">Bez izvođača</option>
               <optgroup label="Izvođači">
                 <option v-for="a in artists" :key="a.id" :value="`artist:${a.id}`">{{ a.name }}</option>
@@ -56,7 +56,7 @@
 
           <div class="form-group">
             <label>Album:</label>
-            <select v-model="formData.albumId">
+            <select v-model="formData.albumId" class="select-dark">
               <option value="">Solo izdanje</option>
               <option v-for="a in albums" :key="a.id" :value="a.id">{{ a.name }}</option>
             </select>
@@ -98,7 +98,7 @@
         <template v-if="itemType === 'album'">
           <div class="form-group">
             <label>Izvođač / Bend (nosilac albuma):</label>
-            <select v-model="formData.artistId">
+            <select v-model="formData.artistId" class="select-dark">
               <option value="">Izaberi</option>
               <optgroup label="Izvođači">
                 <option v-for="a in artists" :key="a.id" :value="a.id">{{ a.name }}</option>
@@ -166,7 +166,7 @@
           <div class="form-group">
             <label>Članovi benda:</label>
             <div v-for="(m, i) in formData.members || []" :key="i" class="member-row">
-              <select v-model="m.artistId">
+              <select v-model="m.artistId" class="select-dark">
                 <option value="">Izaberi izvođača</option>
                 <option v-for="a in artists" :key="a.id" :value="a.id">{{ a.name }}</option>
               </select>
@@ -198,7 +198,7 @@
           <div class="form-group">
             <label>Izvođači (performers):</label>
             <div v-for="(p, i) in formData.performers || []" :key="i" class="member-row">
-              <select v-model="p.sourceId">
+              <select v-model="p.sourceId" class="select-dark">
                 <option value="">Izaberi izvođača/bend</option>
                 <optgroup label="Izvođači">
                   <option v-for="a in artists" :key="a.id" :value="`artist:${a.id}`">{{ a.name }}</option>
@@ -216,7 +216,7 @@
           <div class="form-group">
             <label>Set lista (pjesme):</label>
             <div v-for="(s, i) in formData.setlist || []" :key="i" class="member-row">
-              <select v-model="s.songId">
+              <select v-model="s.songId" class="select-dark">
                 <option value="">Izaberi pjesmu</option>
                 <option v-for="sg in songs" :key="sg.id" :value="sg.id">{{ sg.name }}</option>
               </select>
@@ -252,7 +252,7 @@
         </div>
 
         <button :disabled="saving" @click="saveItem">
-          {{ saving ? "Čuvanje..." : "💾 Sačuvaj" }}
+          {{ saving ? "Čuvanje..." : "Sačuvaj" }}
         </button>
 
         <p v-if="success" class="success-msg">✅ Uspješno sačuvano!</p>
@@ -349,7 +349,7 @@ const saveItem = async () => {
   try {
     let newItem = { ...formData.value, postedBy: userStore.user?.email || "unknown", postedDate: now };
 
-    // 🟩 SONG
+  
     if (itemType.value === "song") {
       // ako je izabran album → dodaj referencu
       if (formData.value.albumId) {
@@ -374,7 +374,6 @@ const saveItem = async () => {
       }
     }
 
-    // 🟩 BAND
     if (itemType.value === "band") {
       // kod svakog člana dodaj referencu na bend
       if (formData.value.members?.length) {
@@ -388,7 +387,6 @@ const saveItem = async () => {
       }
     }
 
-    // 🟩 PERFORMANCE
     if (itemType.value === "performance") {
       // performers: konvertuj sourceId u {id, name, type}
       if (formData.value.performers?.length) {
@@ -416,7 +414,6 @@ const saveItem = async () => {
       newItem.location = formData.value.location || {};
     }
 
-    // 🟩 EDITOR → automatski pravi review
     if (userStore.userRole === "editor") {
       const reviewRef = push(dbRef(dbInstance, "reviews"));
       await set(reviewRef, {
@@ -448,17 +445,22 @@ const saveItem = async () => {
 };
 </script>
 
+
 <style scoped>
 .add-item {
   max-width: 900px;
   margin: 2rem auto;
   padding: 2rem;
-  background: white;
+  /* translucent purple glass */
+  background: rgba(99,102,241,0.06);
   border-radius: 12px;
-  box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+  box-shadow: 0 10px 30px rgba(84,63,215,0.10);
+  border: 1px solid rgba(124,58,237,0.18);
+  backdrop-filter: blur(6px);
+  color: #fff;
 }
 h1 {
-  color: #4caf50;
+  color: #efd9ff;
   text-align: center;
   margin-bottom: 1.5rem;
 }
@@ -470,37 +472,79 @@ label {
   display: block;
   margin-bottom: 0.3rem;
 }
-input, textarea, select {
+.input, input, textarea, select {
   width: 100%;
-  padding: 0.6rem;
-  border-radius: 6px;
-  border: 1px solid #ccc;
-  margin-bottom: 0.4rem;
+  padding: 0.7rem;
+  border-radius: 8px;
+  border: 1px solid rgba(124,58,237,0.12);
+  margin-bottom: 0.5rem;
+  background: rgba(255,255,255,0.03);
+  color: #fff;
+  outline: none;
+}
+.input:focus, input:focus, textarea:focus, select:focus {
+  border-color: rgba(124,58,237,0.6);
+  box-shadow: 0 0 8px rgba(124,58,237,0.08);
+}
+
+/* Make native select match the dark purple theme and avoid white dropdown styling */
+select {
+  -webkit-appearance: none;
+  -moz-appearance: none;
+  appearance: none;
+  background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='16' height='16' viewBox='0 0 16 16'><path fill='%23e9dbff' d='M3.204 5.602a.5.5 0 0 1 .706 0L8 9.693l4.09-4.09a.5.5 0 1 1 .707.707l-4.435 4.435a.5.5 0 0 1-.707 0L3.204 6.309a.5.5 0 0 1 0-.707z'/></svg>");
+  background-repeat: no-repeat;
+  background-position: calc(100% - 12px) center;
+  padding-right: 2.2rem;
+}
+
+/* hide IE/Edge native dropdown arrow */
+select::-ms-expand { display: none; }
+
+/* Attempt to style options (may vary by platform) */
+option {
+  background: rgba(37,36,36,0.98);
+  color: #fff;
+}
+/* stronger rule for selects in this view when using select-dark class */
+.select-dark {
+  background-color: rgba(37,36,36,0.9) !important;
+  color: #fff !important;
+  border: 1px solid rgba(124,58,237,0.18) !important;
+  padding-right: 2.2rem !important;
+  -webkit-appearance: none !important;
+  -moz-appearance: none !important;
+  appearance: none !important;
+  background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='16' height='16' viewBox='0 0 16 16'><path fill='%23e9dbff' d='M3.204 5.602a.5.5 0 0 1 .706 0L8 9.693l4.09-4.09a.5.5 0 1 1 .707.707l-4.435 4.435a.5.5 0 0 1-.707 0L3.204 6.309a.5.5 0 0 1 0-.707z'/></svg>") !important;
+  background-repeat: no-repeat !important;
+  background-position: calc(100% - 12px) center !important;
 }
 button {
-  background: #4caf50;
+  background: linear-gradient(90deg, #7e57c2 0%, #9c6bff 100%);
   color: white;
   border: none;
-  padding: 0.6rem 1.2rem;
-  border-radius: 8px;
+  padding: 0.7rem 1.3rem;
+  border-radius: 10px;
   cursor: pointer;
-  font-weight: bold;
+  font-weight: 700;
 }
 button:hover {
-  background: #43a047;
+  transform: translateY(-2px);
+  box-shadow: 0 10px 30px rgba(124,58,237,0.12);
 }
 .success-msg {
-  color: #388e3c;
+  color: #9be79b; /* soft green on purple */
   font-weight: 600;
   margin-top: 1rem;
 }
 .error-msg {
-  background: #ffebee;
-  color: #c62828;
+  background: rgba(255, 82, 82, 0.06);
+  color: #ff8a80;
   padding: 1rem;
   border-radius: 8px;
   text-align: center;
   margin: 2rem auto;
+  border: 1px solid rgba(255,82,82,0.08);
 }
 .member-row {
   display: flex;

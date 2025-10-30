@@ -84,3 +84,39 @@ body {
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
 }
+
+/* Global styled selects to match dark/purple glass theme */
+select {
+  -webkit-appearance: none;
+  -moz-appearance: none;
+  appearance: none;
+  background-color: rgba(255,255,255,0.03);
+  color: var(--vt-c-white);
+  border: 1px solid rgba(124,58,237,0.12);
+  padding: 0.6rem 2.2rem 0.6rem 0.7rem;
+  border-radius: 8px;
+  outline: none;
+  background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='16' height='16' viewBox='0 0 16 16'><path fill='%23e9dbff' d='M3.204 5.602a.5.5 0 0 1 .706 0L8 9.693l4.09-4.09a.5.5 0 1 1 .707.707l-4.435 4.435a.5.5 0 0 1-.707 0L3.204 6.309a.5.5 0 0 1 0-.707z'/></svg>");
+  background-repeat: no-repeat;
+  background-position: calc(100% - 12px) center;
+}
+
+select:focus {
+  border-color: rgba(124,58,237,0.6);
+  box-shadow: 0 0 8px rgba(124,58,237,0.08);
+}
+
+/* Hide IE/Edge default arrow */
+select::-ms-expand { display: none; }
+
+/* Attempt to style options: platform-dependent */
+option {
+  background: var(--color-background);
+  color: var(--color-text);
+}
+
+/* For compact selects used in toolbars */
+.select-compact {
+  padding: 0.35rem 1.6rem 0.35rem 0.6rem;
+  font-size: 0.95rem;
+}
