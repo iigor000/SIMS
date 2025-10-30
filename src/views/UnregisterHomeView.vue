@@ -157,6 +157,12 @@ const getArtistName = (item) => {
   // common places for artist/author
   return item.songwriters?.[0]?.name || item.artist || item.author || '';
 };
+
+// pick a sensible image field from item
+const getImageUrl = (item) => {
+  if (!item) return '';
+  return item.imageUrl || item.image || item.coverUrl || item.thumbnail || item.artwork || '';
+};
 </script>
 
 <template>
@@ -198,12 +204,17 @@ const getArtistName = (item) => {
           <button class="scroll-btn left" aria-label="Scroll left" @click="scrollContainer(popularListRef, -1)">‹</button>
           <div class="popular-list" ref="popularListRef">
             <div v-for="item in popularItems" :key="item.id" class="popular-card">
-              <div class="popular-top">
-                <RouterLink :to="`/item/${item.type || 'song'}/${item.id}`" class="popular-title">
-                  {{ item.name || item.title || item.displayName || 'Bez naslova' }}
-                </RouterLink>
-                <span class="item-type">{{ typeLabel(item) }}</span>
-              </div>
+                <div v-if="getImageUrl(item)" class="popular-thumb-wrap">
+                  <RouterLink :to="`/item/${item.type || 'song'}/${item.id}`">
+                    <img :src="getImageUrl(item)" class="popular-thumb" @error="e => e.target.style.display='none'" />
+                  </RouterLink>
+                </div>
+                <div class="popular-top">
+                  <RouterLink :to="`/item/${item.type || 'song'}/${item.id}`" class="popular-title">
+                    {{ item.name || item.title || item.displayName || 'Bez naslova' }}
+                  </RouterLink>
+                  <span class="item-type">{{ typeLabel(item) }}</span>
+                </div>
               <RouterLink v-if="item.songwriters?.[0]?.id" :to="`/item/artist/${item.songwriters?.[0]?.id}`" class="popular-artist">
                 {{ item.songwriters?.[0]?.name || item.author || 'Nepoznati autor' }}
               </RouterLink>
@@ -238,11 +249,16 @@ const getArtistName = (item) => {
         <div v-else-if="filteredItems.length > 0" class="song-list">
           <div v-for="item in filteredItems" :key="item.id" class="song-card">
             <div class="song-top">
-              <RouterLink
-                :to="`/item/${item.type || 'song'}/${item.id}`"
-                class="song-title"
-                v-html="highlightMatch(item.name || item.title || item.displayName || 'Bez naslova')"
-              ></RouterLink>
+              <div class="song-left">
+                <RouterLink :to="`/item/${item.type || 'song'}/${item.id}`">
+                  <img v-if="getImageUrl(item)" :src="getImageUrl(item)" class="song-thumb" @error="e => e.target.style.display='none'" />
+                </RouterLink>
+                <RouterLink
+                  :to="`/item/${item.type || 'song'}/${item.id}`"
+                  class="song-title"
+                  v-html="highlightMatch(item.name || item.title || item.displayName || 'Bez naslova')"
+                ></RouterLink>
+              </div>
               <span class="item-type">{{ typeLabel(item) }}</span>
             </div>
             <p class="artist" v-if="item.songwriters?.[0]?.id || item.author">
@@ -490,6 +506,10 @@ h2 {
   justify-content: space-between;
   gap: 0.75rem;
 }
+.popular-thumb-wrap { margin-bottom: 0.6rem; }
+.popular-thumb { width: 100%; height: 120px; object-fit: cover; border-radius: 8px; display: block; }
+.song-left { display: flex; align-items: center; gap: 0.75rem; }
+.song-thumb { width: 72px; height: 72px; object-fit: cover; border-radius: 8px; border: 1px solid rgba(124,58,237,0.12); }
 .item-type {
   background: rgba(255,255,255,0.06);
   color: #e9dbff;

@@ -33,6 +33,15 @@
           <textarea v-model="formData.description" placeholder="Opis..." />
         </div>
 
+        <!-- Image URL (shared for all item types) -->
+        <div class="form-group">
+          <label>Slika (URL):</label>
+          <input v-model="formData.imageUrl" placeholder="https://example.com/image.jpg" />
+          <div v-if="formData.imageUrl" class="image-preview">
+            <img :src="formData.imageUrl" alt="Preview" @error="e => e.target.style.display='none'" />
+          </div>
+        </div>
+
         <!-- ===================== 🎵 SONG ===================== -->
         <template v-if="itemType === 'song'">
           <div class="form-group">
@@ -565,5 +574,15 @@ button:hover {
 }
 .btn-small:hover {
   background: #c62828;
+}
+.image-preview {
+  margin-top: 0.5rem;
+}
+.image-preview img {
+  max-width: 180px;
+  max-height: 140px;
+  display: block;
+  border-radius: 8px;
+  border: 1px solid rgba(124,58,237,0.12);
 }
 </style>

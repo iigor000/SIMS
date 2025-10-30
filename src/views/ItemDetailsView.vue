@@ -15,6 +15,9 @@
     <div v-else-if="item" class="item-content">
       <!-- Item Header -->
       <div class="item-header">
+        <div v-if="showImage && imageSrc" class="item-cover">
+          <img :src="imageSrc" alt="cover" @error="onImageError" @click="openImage" />
+        </div>
         <div class="item-basic-info">
           <h1 class="item-title">{{ item.name }}</h1>
           <p class="item-type-badge">{{ getItemTypeLabel(itemType) }}</p>
@@ -260,6 +263,29 @@ const handleReviewSubmitted = () => {
   reviewsKey.value += 1
 }
 
+// Image handling for item
+const showImage = ref(true)
+const imageSrc = computed(() => {
+  if (!item.value) return ''
+  return (
+    item.value.imageUrl ||
+    item.value.image ||
+    item.value.coverUrl ||
+    item.value.thumbnail ||
+    item.value.artwork ||
+    ''
+  )
+})
+
+const onImageError = () => {
+  showImage.value = false
+}
+
+const openImage = () => {
+  if (!imageSrc.value) return
+  window.open(imageSrc.value, '_blank', 'noopener')
+}
+
 // Lifecycle
 onMounted(() => {
   fetchItemDetails()
@@ -287,15 +313,17 @@ watch(
   max-width: 1200px;
   margin: 0 auto;
   padding: 20px;
+  color: #e6e6f0;
 }
 
 .loading, .error, .not-found {
   text-align: center;
   padding: 40px;
+  color: #e6e6f0;
 }
 
 .error {
-  color: #d32f2f;
+  color: #ff7a7a;
 }
 
 .item-header {
@@ -304,27 +332,46 @@ watch(
   align-items: flex-start;
   margin-bottom: 30px;
   padding-bottom: 20px;
-  border-bottom: 1px solid #e0e0e0;
+  border-bottom: 1px solid rgba(124,58,237,0.12);
 }
 
 .item-basic-info {
   flex: 1;
 }
 
+.item-cover {
+  width: 220px;
+  height: 220px;
+  flex: 0 0 220px;
+  margin-right: 20px;
+  border-radius: 12px;
+  overflow: hidden;
+  box-shadow: 0 6px 20px rgba(124,58,237,0.06);
+  border: 1px solid rgba(124,58,237,0.12);
+}
+
+.item-cover img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+  cursor: pointer;
+}
+
 .item-title {
   font-size: 2.5rem;
   margin: 0 0 10px 0;
-  color: #333;
+  color: #efe6ff;
 }
 
 .item-type-badge {
   display: inline-block;
-  background: #007bff;
+  background: linear-gradient(90deg, rgba(124,58,237,0.95), rgba(99,102,241,0.95));
   color: white;
-  padding: 4px 12px;
+  padding: 6px 14px;
   border-radius: 20px;
   font-size: 0.9rem;
-  font-weight: 500;
+  font-weight: 600;
 }
 
 .item-details-section {
@@ -337,18 +384,19 @@ watch(
 
 .description-section h3 {
   margin-bottom: 10px;
-  color: #555;
+  color: #efe6ff;
 }
 
 .item-description {
   line-height: 1.6;
-  color: #666;
+  color: #dcd4f8;
 }
 
 .specific-details {
-  background: #f8f9fa;
+  background: rgba(124,58,237,0.06);
   padding: 20px;
   border-radius: 8px;
+  border: 1px solid rgba(124,58,237,0.18);
 }
 
 .detail-grid {
@@ -364,7 +412,7 @@ watch(
 
 .detail-row strong {
   min-width: 120px;
-  color: #333;
+  color: #e9dbff;
 }
 
 .genres-list {
@@ -374,8 +422,8 @@ watch(
 }
 
 .genre-tag {
-  background: #e9ecef;
-  color: #495057;
+  background: rgba(124,58,237,0.12);
+  color: #f5eefb;
   padding: 4px 12px;
   border-radius: 16px;
   font-size: 0.9rem;
@@ -384,13 +432,14 @@ watch(
 .related-items {
   margin-bottom: 40px;
   padding: 20px;
-  background: #f8f9fa;
+  background: rgba(124,58,237,0.04);
   border-radius: 8px;
+  border: 1px solid rgba(124,58,237,0.10);
 }
 
 .related-items h3 {
   margin-bottom: 15px;
-  color: #333;
+  color: #efe6ff;
 }
 
 .related-links {
@@ -400,16 +449,17 @@ watch(
 }
 
 .related-link {
-  color: #007bff;
+  color: #efe6ff;
   text-decoration: none;
   padding: 8px 12px;
-  border-radius: 4px;
-  transition: background-color 0.2s;
+  border-radius: 6px;
+  transition: background-color 0.15s, transform 0.12s;
 }
 
 .related-link:hover {
-  background: #e3f2fd;
-  text-decoration: underline;
+  background: rgba(124,58,237,0.08);
+  transform: translateX(4px);
+  text-decoration: none;
 }
 
 .reviews-section {
@@ -422,46 +472,49 @@ watch(
   align-items: center;
   margin-bottom: 20px;
   padding-bottom: 15px;
-  border-bottom: 1px solid #e0e0e0;
+  border-bottom: 1px solid rgba(124,58,237,0.12);
 }
 
 .reviews-header h2 {
   margin: 0;
-  color: #333;
+  color: #efe6ff;
 }
 
 .media-filter {
   padding: 8px 12px;
-  border: 1px solid #ddd;
-  border-radius: 4px;
-  background: white;
+  border: 1px solid rgba(124,58,237,0.14);
+  border-radius: 6px;
+  background: rgba(0,0,0,0.35);
+  color: #fff;
 }
 
 .review-form-container {
-  background: #f8f9fa;
+  background: rgba(17,24,39,0.48);
   padding: 20px;
   border-radius: 8px;
   margin-bottom: 30px;
+  border: 1px solid rgba(124,58,237,0.16);
 }
 
 .review-form-container h3 {
   margin: 0 0 15px 0;
-  color: #333;
+  color: #efe6ff;
 }
 
 .auth-prompt {
-  background: #fff3cd;
-  border: 1px solid #ffeaa7;
+  background: rgba(124,58,237,0.06);
+  border: 1px solid rgba(124,58,237,0.12);
   padding: 15px;
-  border-radius: 4px;
+  border-radius: 6px;
   margin-bottom: 20px;
   text-align: center;
+  color: #efe6ff;
 }
 
 .auth-prompt a {
-  color: #007bff;
+  color: #e9d5ff;
   text-decoration: none;
-  font-weight: bold;
+  font-weight: 600;
 }
 
 .auth-prompt a:hover {
