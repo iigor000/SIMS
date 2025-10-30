@@ -10,30 +10,29 @@ const { user, userRole, logout } = useAuth();
     <header>
       <div class="wrapper">
         <nav>
-          <RouterLink to="/">Home</RouterLink>
+          <RouterLink to="/">Početna</RouterLink>
 
           <!-- Admin specific links -->
-          <RouterLink v-if="user && userRole === 'admin'" to="/manage-users">Manage Users</RouterLink>
-          <RouterLink v-if="user && userRole === 'admin'" to="/settings">Settings</RouterLink>
-          <RouterLink v-if="user && userRole === 'admin'" to="/content/add">Add new items</RouterLink>
+          <RouterLink v-if="user && userRole === 'admin'" to="/manage-users">Upravljanje korisnicima</RouterLink>
+          <RouterLink v-if="user && userRole === 'admin'" to="/settings">Podešavanja</RouterLink>
+          <RouterLink v-if="user && userRole === 'admin'" to="/content/add">Dodaj novi sadržaj</RouterLink>
 
           <!-- Editor specific links -->
           <RouterLink v-if="user && userRole === 'editor'" to="/content">Upravljanje sadržajem</RouterLink>
-          <RouterLink v-if="user && userRole === 'editor'" to="/publish">Objavi</RouterLink>
 
           <!-- User specific links -->
-          <RouterLink v-if="user && userRole === 'user'" to="/dashboard">Dashboard</RouterLink>
+          <RouterLink v-if="user && userRole === 'user'" to="/dashboard">Kontrolna tabla</RouterLink>
 
           <!-- Right side: show profile when logged, otherwise show login/register -->
           <div class="user-section">
             <template v-if="user">
               <!-- hide the role badge when role is exactly 'user' -->
               <span class="user-role" v-if="userRole && userRole !== 'user'">{{ userRole.toUpperCase() }}</span>
-              <RouterLink to="/profile" class="user-name">{{ user.displayName || user.email || 'Profile' }}</RouterLink>
-              <button @click="logout" class="logout-btn">Logout</button>
+              <RouterLink to="/profile" class="user-name">{{ user.displayName || user.email || 'Profil' }}</RouterLink>
+              <button @click="logout" class="logout-btn">Odjavi se</button>
             </template>
             <template v-else>
-              <RouterLink to="/login" class="auth-link">Login</RouterLink>
+              <RouterLink to="/login" class="auth-link">Prijavi se</RouterLink>
             </template>
           </div>
         </nav>

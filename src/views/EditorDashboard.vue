@@ -154,7 +154,7 @@ onMounted(async () => {
 }
 
 .dashboard-header p {
-  color: #666;
+  color: white;
   font-size: 1.1rem;
 }
 

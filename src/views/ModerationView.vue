@@ -44,7 +44,9 @@ onMounted(refreshPendingReviews)
 
 <template>
   <div class="moderation">
-    <h1>Moderacija recenzija</h1>
+    <div class="page-header">
+      <h1>Moderacija recenzija</h1>
+    </div>
 
     <PendingReviews 
       :pending-reviews="pendingReviews" 
@@ -54,3 +56,25 @@ onMounted(refreshPendingReviews)
     />
   </div>
 </template>
+
+<style scoped>
+.moderation {
+  padding: 24px;
+  max-width: 1400px;
+  margin: 0 auto;
+}
+
+.page-header {
+  text-align: center;
+  margin-bottom: 32px;
+  padding-bottom: 24px;
+  border-bottom: 1px solid rgba(124,58,237,0.1);
+}
+
+.page-header h1 {
+  color: #efe6ff;
+  font-size: 2.25rem;
+  font-weight: 600;
+  margin: 0;
+}
+</style>

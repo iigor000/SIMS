@@ -115,86 +115,125 @@ onMounted(async () => {
 }
 
 .page-header h1 {
-  color: #333;
-  margin-bottom: 10px;
+  color: #ddd6fe;
+  margin-bottom: 12px;
+  font-size: 2.2rem;
+  font-weight: 600;
 }
 
 .page-header p {
-  color: #666;
+  color: #c4b5fd;
   font-size: 1.1rem;
+  opacity: 0.9;
 }
 
 .loading {
   text-align: center;
   padding: 40px;
-  color: #666;
+  color: #ddd6fe;
+  font-size: 1.1rem;
 }
 
 .reviews-stats {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
-  gap: 15px;
-  margin-bottom: 30px;
+  grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+  gap: 20px;
+  margin-bottom: 32px;
 }
 
 .stat-card {
-  background: white;
-  border: 1px solid #e0e0e0;
-  border-radius: 8px;
-  padding: 20px;
+  background: rgba(124,58,237,0.03);
+  border: 1px solid rgba(124,58,237,0.1);
+  border-radius: 12px;
+  padding: 24px;
   text-align: center;
+  transition: transform 0.2s ease;
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+}
+
+.stat-card:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 6px 12px rgba(0, 0, 0, 0.15);
 }
 
 .stat-number {
   display: block;
-  font-size: 2rem;
+  font-size: 2.2rem;
   font-weight: bold;
-  color: #007bff;
-  margin-bottom: 5px;
+  color: #ddd6fe;
+  margin-bottom: 8px;
+  text-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
 }
 
 .stat-label {
   display: block;
   font-size: 0.9rem;
-  color: #666;
+  color: #c4b5fd;
   text-transform: uppercase;
+  letter-spacing: 0.5px;
 }
 
 .filters {
-  margin-bottom: 20px;
+  margin-bottom: 24px;
 }
 
 .filter-select {
-  padding: 10px 15px;
-  border: 1px solid #ddd;
-  border-radius: 4px;
-  background: white;
+  padding: 12px 20px;
+  background: rgba(124,58,237,0.05);
+  border: 1px solid rgba(124,58,237,0.15);
+  border-radius: 8px;
   font-size: 1rem;
+  color: #ddd6fe;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.filter-select:hover {
+  background: rgba(124,58,237,0.08);
+  border-color: rgba(124,58,237,0.2);
+}
+
+.filter-select:focus {
+  outline: none;
+  box-shadow: 0 0 0 2px rgba(124,58,237,0.1);
+}
+
+.filter-select option {
+  background: #1a1a1a;
+  color: #ddd6fe;
 }
 
 .reviews-list {
   display: flex;
   flex-direction: column;
-  gap: 16px;
+  gap: 20px;
 }
 
 .empty-state {
   text-align: center;
   padding: 60px 20px;
-  color: #666;
+  color: #ddd6fe;
+  background: rgba(124,58,237,0.03);
+  border: 1px solid rgba(124,58,237,0.1);
+  border-radius: 12px;
+  margin-top: 20px;
 }
 
 .empty-state .subtext {
-  margin-top: 10px;
-  font-size: 0.9rem;
+  margin-top: 12px;
+  font-size: 1rem;
+  color: #c4b5fd;
 }
 
 .empty-state a {
-  color: #007bff;
+  color: #ddd6fe;
   text-decoration: none;
+  border-bottom: 1px solid rgba(124,58,237,0.3);
+  transition: all 0.2s ease;
 }
 
 .empty-state a:hover {
-  text-decoration: underline;
+  color: #fde047;
+  border-bottom-color: #fde047;
 }
 </style>

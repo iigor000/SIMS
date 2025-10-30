@@ -12,7 +12,7 @@
             <span v-if="review.userRole === 'editor'" class="editor-badge">Editor</span>
           </div>
           <div class="review-meta">
-<StarRating v-model="review.rating" :readonly="true" :show-value="true" size="small" />
+<StarRating :rating="review.rating" :readonly="true" :show-value="true" size="small" />
             <span class="media-badge">{{ getMediaTypeLabel(review.mediaType) }}</span>
             <span class="date">{{ formatDate(review.createdAt) }}</span>
           </div>
@@ -137,46 +137,48 @@ const deleteReview = () => {
 
 <style scoped>
 .review-card {
-  background: white;
-  border: 1px solid #e0e0e0;
-  border-radius: 8px;
-  padding: 20px;
-  margin-bottom: 16px;
-  transition: box-shadow 0.2s;
+  background: rgba(124,58,237,0.03);
+  border: 1px solid rgba(124,58,237,0.1);
+  border-radius: 12px;
+  padding: 24px;
+  margin-bottom: 20px;
+  transition: all 0.2s ease;
 }
 
 .review-card:hover {
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+  transform: translateY(-2px);
+  box-shadow: 0 6px 12px rgba(0, 0, 0, 0.15);
 }
 
 .review-card.editor-review {
-  border-left: 4px solid #007bff;
+  border-left: 4px solid rgba(124,58,237,0.6);
 }
 
 .review-header {
   display: flex;
   justify-content: space-between;
   align-items: flex-start;
-  margin-bottom: 15px;
+  margin-bottom: 16px;
 }
 
 .user-info {
   display: flex;
   align-items: flex-start;
-  gap: 12px;
+  gap: 14px;
 }
 
 .user-avatar {
-  width: 40px;
-  height: 40px;
+  width: 42px;
+  height: 42px;
   border-radius: 50%;
-  background: #007bff;
-  color: white;
+  background: rgba(124,58,237,0.2);
+  color: #ddd6fe;
   display: flex;
   align-items: center;
   justify-content: center;
   font-weight: bold;
   font-size: 1.1rem;
+  border: 1px solid rgba(124,58,237,0.3);
 }
 
 .user-details {
@@ -185,109 +187,119 @@ const deleteReview = () => {
 
 .user-name {
   font-weight: 600;
-  color: #333;
-  margin-bottom: 4px;
+  color: #ddd6fe;
+  margin-bottom: 6px;
   display: flex;
   align-items: center;
-  gap: 8px;
+  gap: 10px;
 }
 
 .editor-badge {
-  background: #007bff;
-  color: white;
-  padding: 2px 8px;
+  background: rgba(124,58,237,0.2);
+  color: #ddd6fe;
+  padding: 3px 10px;
   border-radius: 12px;
-  font-size: 0.7rem;
+  font-size: 0.75rem;
+  border: 1px solid rgba(124,58,237,0.3);
   font-weight: 500;
 }
 
 .review-meta {
   display: flex;
   align-items: center;
-  gap: 12px;
+  gap: 14px;
   flex-wrap: wrap;
 }
 
 .media-badge {
-  background: #e9ecef;
-  color: #495057;
-  padding: 2px 8px;
+  background: rgba(124,58,237,0.1);
+  color: #ddd6fe;
+  padding: 4px 10px;
   border-radius: 12px;
-  font-size: 0.8rem;
+  font-size: 0.85rem;
+  border: 1px solid rgba(124,58,237,0.2);
 }
 
 .date {
-  color: #666;
-  font-size: 0.8rem;
+  color: #c4b5fd;
+  font-size: 0.85rem;
+  opacity: 0.8;
 }
 
 .review-actions {
   display: flex;
-  gap: 8px;
+  gap: 10px;
 }
 
 .action-btn {
-  background: none;
-  border: none;
+  background: rgba(124,58,237,0.1);
+  border: 1px solid rgba(124,58,237,0.2);
   cursor: pointer;
-  padding: 4px;
-  border-radius: 4px;
-  transition: background-color 0.2s;
+  padding: 8px;
+  border-radius: 8px;
+  transition: all 0.2s ease;
   font-size: 1.1rem;
+  color: #ddd6fe;
 }
 
 .action-btn:hover {
-  background: #f8f9fa;
+  background: rgba(124,58,237,0.15);
+  transform: translateY(-1px);
 }
 
 .delete-btn:hover {
-  background: #f8d7da;
+  background: rgba(239,68,68,0.15);
+  border-color: rgba(239,68,68,0.2);
+  color: #fca5a5;
 }
 
 .review-content {
-  margin-bottom: 15px;
+  margin-bottom: 18px;
 }
 
 .review-title {
-  margin: 0 0 10px 0;
-  color: #333;
-  font-size: 1.1rem;
+  margin: 0 0 12px 0;
+  color: #ddd6fe;
+  font-size: 1.15rem;
+  font-weight: 600;
 }
 
 .review-text {
   margin: 0;
-  color: #555;
-  line-height: 1.5;
+  color: #c4b5fd;
+  line-height: 1.7;
   white-space: pre-wrap;
+  opacity: 0.95;
 }
 
 .review-footer {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  padding-top: 15px;
-  border-top: 1px solid #f0f0f0;
+  padding-top: 16px;
+  border-top: 1px solid rgba(124,58,237,0.1);
 }
 
 .language-tag {
-  background: #e3f2fd;
-  color: #1976d2;
-  padding: 2px 8px;
+  background: rgba(124,58,237,0.1);
+  color: #ddd6fe;
+  padding: 4px 10px;
   border-radius: 12px;
-  font-size: 0.8rem;
+  font-size: 0.85rem;
+  border: 1px solid rgba(124,58,237,0.2);
 }
 
 .status-badge {
-  padding: 4px 8px;
-  border-radius: 4px;
-  font-size: 0.8rem;
+  padding: 4px 12px;
+  border-radius: 8px;
+  font-size: 0.85rem;
   font-weight: 500;
 }
 
 .status-badge.pending {
-  background: #fff3cd;
-  color: #856404;
-  border: 1px solid #ffeaa7;
+  background: rgba(234,179,8,0.1);
+  color: #fde68a;
+  border: 1px solid rgba(234,179,8,0.2);
 }
 
 /* Responsive */

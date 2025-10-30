@@ -36,12 +36,6 @@
 
         <!-- Specific details based on item type -->
         <div class="specific-details">
-          <!-- Album details -->
-          <div v-if="itemType === 'album' && item.artist" class="detail-row">
-            <strong>Izvođač:</strong>
-            <span>{{ item.artist.name }}</span>
-          </div>
-
           <!-- Song details -->
           <div v-if="itemType === 'song'" class="detail-grid">
             <div v-if="item.duration" class="detail-row">
@@ -50,7 +44,67 @@
             </div>
             <div v-if="item.album" class="detail-row">
               <strong>Album:</strong>
-              <span>{{ item.album.name }}</span>
+              <router-link :to="`/item/album/${item.album.id}`" class="link">
+                {{ item.album.name }}
+              </router-link>
+            </div>
+            <div v-if="item.songwriters?.length" class="detail-row">
+              <strong>Autori:</strong>
+              <div class="list-links">
+                <router-link 
+                  v-for="songwriter in item.songwriters" 
+                  :key="songwriter.id"
+                  :to="`/item/artist/${songwriter.id}`" 
+                  class="link"
+                >
+                  {{ songwriter.name }}
+                </router-link>
+              </div>
+            </div>
+            <div v-if="item.producers?.length" class="detail-row">
+              <strong>Producenti:</strong>
+              <div class="list-links">
+                <router-link 
+                  v-for="producer in item.producers" 
+                  :key="producer.id"
+                  :to="`/item/artist/${producer.id}`" 
+                  class="link"
+                >
+                  {{ producer.name }}
+                </router-link>
+              </div>
+            </div>
+            <div v-if="item.lyrics" class="detail-row lyrics-section">
+              <strong>Tekst:</strong>
+              <pre class="lyrics">{{ item.lyrics }}</pre>
+            </div>
+          </div>
+
+          <!-- Album details -->
+          <div v-if="itemType === 'album'" class="detail-grid">
+            <div v-if="item.releaseDate" class="detail-row">
+              <strong>Datum izdanja:</strong>
+              <span>{{ formatDate(item.releaseDate) }}</span>
+            </div>
+            <div v-if="item.artist" class="detail-row">
+              <strong>Izvođač:</strong>
+              <router-link 
+                :to="`/item/${item.artist.type || 'artist'}/${item.artist.id}`" 
+                class="link"
+              >
+                {{ item.artist.name }}
+              </router-link>
+            </div>
+            <div v-if="item.tracks?.length" class="detail-row">
+              <strong>Pesme:</strong>
+              <div class="tracks-list">
+                <div v-for="track in item.tracks" :key="track.id" class="track-item">
+                  <router-link :to="`/item/song/${track.id}`" class="link">
+                    {{ track.name }}
+                  </router-link>
+                  <span v-if="track.duration" class="track-duration">{{ track.duration }}</span>
+                </div>
+              </div>
             </div>
           </div>
 
@@ -64,6 +118,36 @@
               <strong>Mesto:</strong>
               <span>{{ item.originCity }}</span>
             </div>
+            <div v-if="item.members?.length" class="detail-row">
+              <strong>Članovi:</strong>
+              <div class="members-list">
+                <div v-for="member in item.members" :key="member.id" class="member-item">
+                  <router-link :to="`/item/artist/${member.id}`" class="link">
+                    {{ member.name }}
+                  </router-link>
+                  <span v-if="member.role" class="member-role"> - {{ member.role }}</span>
+                  <span v-if="member.joinDate" class="member-date">
+                    ({{ formatDate(member.joinDate) }} - {{ member.leaveDate ? formatDate(member.leaveDate) : 'danas' }})
+                  </span>
+                  <span v-else-if="member.leaveDate" class="member-date">
+                    (do {{ formatDate(member.leaveDate) }})
+                  </span>
+                </div>
+              </div>
+            </div>
+            <div v-if="item.albums?.length" class="detail-row">
+              <strong>Albumi:</strong>
+              <div class="albums-list">
+                <div v-for="album in item.albums" :key="album.id" class="album-item">
+                  <router-link :to="`/item/album/${album.id}`" class="link">
+                    {{ album.name }}
+                  </router-link>
+                  <span v-if="album.releaseDate" class="album-date">
+                    {{ formatDate(album.releaseDate) }}
+                  </span>
+                </div>
+              </div>
+            </div>
           </div>
 
           <!-- Artist details -->
@@ -75,6 +159,32 @@
             <div v-if="item.birthPlace" class="detail-row">
               <strong>Mesto rođenja:</strong>
               <span>{{ item.birthPlace }}</span>
+            </div>
+            <div v-if="item.bands?.length" class="detail-row">
+              <strong>Bendovi:</strong>
+              <div class="list-links">
+                <router-link 
+                  v-for="band in item.bands" 
+                  :key="band.id"
+                  :to="`/item/band/${band.id}`" 
+                  class="link"
+                >
+                  {{ band.name }}
+                </router-link>
+              </div>
+            </div>
+            <div v-if="item.songs?.length" class="detail-row">
+              <strong>Pesme:</strong>
+              <div class="list-links">
+                <router-link 
+                  v-for="song in item.songs" 
+                  :key="song.id"
+                  :to="`/item/song/${song.id}`" 
+                  class="link"
+                >
+                  {{ song.name }}
+                </router-link>
+              </div>
             </div>
           </div>
 
@@ -88,9 +198,22 @@
               <strong>Lokacija:</strong>
               <span>{{ item.location.venue }}, {{ item.location.city }}</span>
             </div>
+            <div v-if="item.performers?.length" class="detail-row">
+              <strong>Izvođači:</strong>
+              <div class="list-links">
+                <router-link 
+                  v-for="performer in item.performers" 
+                  :key="performer.id"
+                  :to="`/item/${performer.type}/${performer.id}`" 
+                  class="link"
+                >
+                  {{ performer.name }}
+                </router-link>
+              </div>
+            </div>
           </div>
 
-          <!-- Genres -->
+          <!-- Genres (common to multiple types) -->
           <div v-if="item.genres && item.genres.length" class="detail-row">
             <strong>Žanrovi:</strong>
             <div class="genres-list">
@@ -205,8 +328,8 @@ const route = useRoute()
 const userStore = useUserStore()
 
 // Reactive data
-const itemId = route.params.id
-const itemType = route.params.type
+const itemId = ref(route.params.id)
+const itemType = ref(route.params.type)
 const item = ref(null)
 const loading = ref(true)
 const error = ref(null)
@@ -234,7 +357,7 @@ const fetchItemDetails = async () => {
     error.value = null
     
     // Construct Firebase path based on item type
-    const itemPath = `items/${itemType}/${itemId}`
+    const itemPath = `items/${itemType.value}/${itemId.value}`
     const itemSnapshot = await get(dbRef(db, itemPath))
     
     if (itemSnapshot.exists()) {
@@ -295,7 +418,11 @@ onMounted(() => {
 import { watch } from 'vue'
 watch(
   () => route.params,
-  () => {
+  (newParams) => {
+    // Update route params
+    itemId.value = newParams.id
+    itemType.value = newParams.type
+    
     // Reset state when route changes
     item.value = null
     loading.value = true
@@ -303,8 +430,10 @@ watch(
     selectedMediaType.value = 'all'
     reviewsKey.value = 0
     
+    // Fetch new data
     fetchItemDetails()
-  }
+  },
+  { immediate: true } // Run immediately on component mount
 )
 </script>
 
@@ -312,26 +441,26 @@ watch(
 .item-details {
   max-width: 1200px;
   margin: 0 auto;
-  padding: 20px;
-  color: #e6e6f0;
+  padding: 24px;
+  color: #ffffff;
 }
 
 .loading, .error, .not-found {
   text-align: center;
   padding: 40px;
-  color: #e6e6f0;
+  color: #ddd6fe;
 }
 
 .error {
-  color: #ff7a7a;
+  color: #fca5a5;
 }
 
 .item-header {
   display: flex;
   justify-content: space-between;
   align-items: flex-start;
-  margin-bottom: 30px;
-  padding-bottom: 20px;
+  margin-bottom: 32px;
+  padding-bottom: 24px;
   border-bottom: 1px solid rgba(124,58,237,0.12);
 }
 
@@ -394,31 +523,172 @@ watch(
 
 .specific-details {
   background: rgba(124,58,237,0.06);
-  padding: 20px;
-  border-radius: 8px;
+  padding: 24px;
+  border-radius: 12px;
   border: 1px solid rgba(124,58,237,0.18);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
 }
 
 .detail-grid {
   display: grid;
-  gap: 15px;
+  gap: 20px;
 }
 
 .detail-row {
   display: flex;
-  align-items: flex-start;
-  gap: 10px;
+  flex-direction: column;
+  gap: 8px;
 }
 
 .detail-row strong {
-  min-width: 120px;
-  color: #e9dbff;
+  font-size: 0.9rem;
+  color: #ddd6fe;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  font-weight: 600;
+  opacity: 0.9;
+}
+
+.link {
+  color: #c4b5fd;
+  text-decoration: none;
+  transition: all 0.2s ease;
+  padding: 2px 6px;
+  margin: -2px -6px;
+  border-radius: 4px;
+}
+
+.link:hover {
+  color: #ddd6fe;
+  background: rgba(124,58,237,0.08);
+}
+
+.list-links {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px;
+  margin-top: 4px;
+}
+
+.tracks-list {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  margin-top: 8px;
+}
+
+.track-item {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 8px 12px;
+  border-radius: 8px;
+  transition: background-color 0.2s;
+}
+
+.track-item:hover {
+  background: rgba(124,58,237,0.08);
+}
+
+.track-duration {
+  color: #a899c2;
+  font-size: 0.875rem;
+  opacity: 0.8;
+}
+
+.lyrics-section {
+  margin-top: 16px;
+}
+
+.lyrics {
+  white-space: pre-wrap;
+  font-family: inherit;
+  background: rgba(17,24,39,0.48);
+  padding: 16px;
+  border-radius: 8px;
+  margin-top: 8px;
+  border: 1px solid rgba(124,58,237,0.16);
+  line-height: 1.7;
+  color: #e2e8f0;
+  font-size: 0.95rem;
+}
+
+.members-list {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  margin-top: 8px;
+}
+
+.member-item {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 8px;
+  padding: 8px 12px;
+  border-radius: 8px;
+  transition: background-color 0.2s;
+}
+
+.member-item:hover {
+  background: rgba(124,58,237,0.08);
+}
+
+.member-role {
+  color: #c4b5fd;
+  font-weight: 500;
+}
+
+.member-date {
+  color: #a899c2;
+  font-size: 0.875rem;
+  opacity: 0.8;
+}
+
+.albums-list {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  margin-top: 8px;
+}
+
+.album-item {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 8px 12px;
+  border-radius: 8px;
+  transition: background-color 0.2s;
+}
+
+.album-item:hover {
+  background: rgba(124,58,237,0.08);
+}
+
+.album-date {
+  color: #a899c2;
+  font-size: 0.875rem;
+  opacity: 0.8;
 }
 
 .genres-list {
   display: flex;
   flex-wrap: wrap;
   gap: 8px;
+  margin-top: 8px;
+}
+
+.genre-tag {
+  background: rgba(124,58,237,0.12);
+  color: #ddd6fe;
+  padding: 4px 12px;
+  border-radius: 16px;
+  font-size: 0.9rem;
+  transition: background-color 0.2s;
+}
+
+.genre-tag:hover {
+  background: rgba(124,58,237,0.16);
 }
 
 .genre-tag {
@@ -430,95 +700,120 @@ watch(
 }
 
 .related-items {
-  margin-bottom: 40px;
-  padding: 20px;
-  background: rgba(124,58,237,0.04);
-  border-radius: 8px;
-  border: 1px solid rgba(124,58,237,0.10);
+  margin: 32px 0;
+  padding: 24px;
+  background: rgba(124,58,237,0.06);
+  border-radius: 12px;
+  border: 1px solid rgba(124,58,237,0.16);
+  box-shadow: 0 4px 12px rgba(0,0,0,0.1);
 }
 
 .related-items h3 {
-  margin-bottom: 15px;
-  color: #efe6ff;
+  margin-bottom: 16px;
+  color: #ffffff;
+  font-size: 1.25rem;
+  font-weight: 600;
 }
 
 .related-links {
   display: flex;
   flex-direction: column;
-  gap: 10px;
+  gap: 12px;
 }
 
 .related-link {
-  color: #efe6ff;
+  color: #ffffff;
   text-decoration: none;
-  padding: 8px 12px;
-  border-radius: 6px;
-  transition: background-color 0.15s, transform 0.12s;
+  padding: 12px 16px;
+  border-radius: 8px;
+  background: rgba(124,58,237,0.08);
+  transition: all 0.2s ease;
+  display: flex;
+  align-items: center;
 }
 
 .related-link:hover {
-  background: rgba(124,58,237,0.08);
+  background: rgba(124,58,237,0.12);
   transform: translateX(4px);
   text-decoration: none;
 }
 
 .reviews-section {
-  margin-top: 40px;
+  margin-top: 48px;
+  background: rgba(124,58,237,0.03);
+  padding: 32px;
+  border-radius: 16px;
+  border: 1px solid rgba(124,58,237,0.1);
 }
 
 .reviews-header {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  margin-bottom: 20px;
-  padding-bottom: 15px;
+  margin-bottom: 24px;
+  padding-bottom: 16px;
   border-bottom: 1px solid rgba(124,58,237,0.12);
 }
 
 .reviews-header h2 {
   margin: 0;
-  color: #efe6ff;
-}
-
-.media-filter {
-  padding: 8px 12px;
-  border: 1px solid rgba(124,58,237,0.14);
-  border-radius: 6px;
-  background: rgba(0,0,0,0.35);
-  color: #fff;
-}
-
-.review-form-container {
-  background: rgba(17,24,39,0.48);
-  padding: 20px;
-  border-radius: 8px;
-  margin-bottom: 30px;
-  border: 1px solid rgba(124,58,237,0.16);
-}
-
-.review-form-container h3 {
-  margin: 0 0 15px 0;
-  color: #efe6ff;
-}
-
-.auth-prompt {
-  background: rgba(124,58,237,0.06);
-  border: 1px solid rgba(124,58,237,0.12);
-  padding: 15px;
-  border-radius: 6px;
-  margin-bottom: 20px;
-  text-align: center;
-  color: #efe6ff;
-}
-
-.auth-prompt a {
-  color: #e9d5ff;
-  text-decoration: none;
+  color: #ffffff;
+  font-size: 1.75rem;
   font-weight: 600;
 }
 
+.media-filter {
+  padding: 8px 16px;
+  border: 1px solid rgba(124,58,237,0.2);
+  border-radius: 8px;
+  background: rgba(124,58,237,0.1);
+  color: #ffffff;
+  font-size: 0.95rem;
+  transition: all 0.2s ease;
+}
+
+.media-filter:hover {
+  background: rgba(124,58,237,0.15);
+  border-color: rgba(124,58,237,0.25);
+}
+
+.review-form-container {
+  background: rgba(124,58,237,0.06);
+  padding: 24px;
+  border-radius: 12px;
+  margin-bottom: 32px;
+  border: 1px solid rgba(124,58,237,0.16);
+  margin-top: 24px;
+  box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+}
+
+.review-form-container h3 {
+  margin: 0 0 16px 0;
+  color: #ffffff;
+  font-size: 1.25rem;
+  font-weight: 600;
+}
+
+.auth-prompt {
+  background: rgba(124,58,237,0.08);
+  border: 1px solid rgba(124,58,237,0.16);
+  padding: 20px;
+  border-radius: 8px;
+  margin-bottom: 24px;
+  text-align: center;
+  color: #ffffff;
+}
+
+.auth-prompt a {
+  color: #c4b5fd;
+  text-decoration: none;
+  font-weight: 600;
+  transition: color 0.2s;
+}
+
 .auth-prompt a:hover {
-  text-decoration: underline;
+  color: #ddd6fe;
+  text-decoration: none;
 }
 
 /* Responsive design */

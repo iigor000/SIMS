@@ -259,7 +259,7 @@
 import { ref, computed, onMounted } from 'vue'
 import { useModeration } from '@/composables/useModeration'
 import { useUserStore } from '@/stores/user'
-import StarRating from '@/components/reviews/StarRating.vue'
+import StarRating from '@/components/reviews/StarRaiting.vue'
 
 const userStore = useUserStore()
 const {

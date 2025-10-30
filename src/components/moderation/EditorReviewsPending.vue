@@ -105,28 +105,35 @@ const formatMediaType = (type) => {
   align-items: center;
   gap: 1rem;
   margin-bottom: 2rem;
+  background: rgba(124, 58, 237, 0.05);
+  padding: 1rem 1.5rem;
+  border-radius: 8px;
 }
 
 .section-header h2 {
-  color: #333;
+  color: #ffffff;
   font-size: 1.8rem;
   margin: 0;
 }
 
 .count-badge {
-  background: #ff9800;
-  color: white;
+  background: rgba(124, 58, 237, 0.3);
+  color: #ffffff;
   padding: 0.25rem 0.75rem;
   border-radius: 20px;
   font-weight: 600;
   font-size: 0.9rem;
+  box-shadow: 0 2px 4px rgba(124, 58, 237, 0.1);
 }
 
 .loading, .empty {
   text-align: center;
   padding: 3rem;
-  color: #666;
+  color: #ffffff;
   font-size: 1.1rem;
+  background: rgba(124, 58, 237, 0.1);
+  border-radius: 12px;
+  border: 1px solid rgba(124, 58, 237, 0.2);
 }
 
 .reviews-grid {
@@ -135,18 +142,19 @@ const formatMediaType = (type) => {
 }
 
 .editor-review-card {
-  background: white;
-  border: 2px solid #e0e0e0;
+  background: rgba(124, 58, 237, 0.1);
+  border: 1px solid rgba(124, 58, 237, 0.2);
   border-radius: 12px;
   padding: 1.5rem;
   transition: all 0.3s ease;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+  box-shadow: 0 2px 8px rgba(124, 58, 237, 0.05);
 }
 
 .editor-review-card:hover {
-  border-color: #4CAF50;
-  box-shadow: 0 4px 16px rgba(76, 175, 80, 0.15);
+  border-color: rgba(124, 58, 237, 0.4);
+  box-shadow: 0 4px 16px rgba(124, 58, 237, 0.15);
   transform: translateY(-2px);
+  background: rgba(124, 58, 237, 0.15);
 }
 
 .review-preview {
@@ -161,25 +169,26 @@ const formatMediaType = (type) => {
 }
 
 .review-header h4 {
-  color: #333;
+  color: #ffffff;
   font-size: 1.2rem;
   margin: 0;
   flex: 1;
 }
 
 .editor-badge {
-  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-  color: white;
+  background: rgba(124, 58, 237, 0.3);
+  color: #ffffff;
   padding: 0.25rem 0.75rem;
   border-radius: 20px;
   font-size: 0.75rem;
   font-weight: 600;
   text-transform: uppercase;
   letter-spacing: 0.5px;
+  border: 1px solid rgba(124, 58, 237, 0.2);
 }
 
 .review-excerpt {
-  color: #555;
+  color: rgba(255, 255, 255, 0.9);
   line-height: 1.6;
   margin: 0.75rem 0;
   font-size: 1rem;
@@ -191,11 +200,11 @@ const formatMediaType = (type) => {
   gap: 1rem;
   margin-top: 1rem;
   padding-top: 1rem;
-  border-top: 1px solid #eee;
+  border-top: 1px solid rgba(255, 255, 255, 0.1);
 }
 
 .review-meta span {
-  color: #666;
+  color: rgba(255, 255, 255, 0.8);
   font-size: 0.9rem;
   display: flex;
   align-items: center;
@@ -204,20 +213,20 @@ const formatMediaType = (type) => {
 
 .user {
   font-weight: 600;
-  color: #333;
+  color: #ffffff;
 }
 
 .rating {
-  color: #ff9800;
+  color: #ffffff;
   font-weight: 600;
 }
 
 .media-type {
-  color: #2196F3;
+  color: rgba(255, 255, 255, 0.9);
 }
 
 .date {
-  color: #888;
+  color: rgba(255, 255, 255, 0.8);
 }
 
 .quick-actions {
@@ -229,7 +238,7 @@ const formatMediaType = (type) => {
 .quick-btn {
   flex: 1;
   padding: 0.75rem 1.5rem;
-  border: none;
+  border: 1px solid rgba(124, 58, 237, 0.2);
   border-radius: 8px;
   font-size: 1rem;
   font-weight: 600;
@@ -242,25 +251,26 @@ const formatMediaType = (type) => {
 }
 
 .quick-btn.approve {
-  background: linear-gradient(135deg, #4CAF50 0%, #45a049 100%);
-  color: white;
+  background: rgba(124, 58, 237, 0.3);
+  color: #ffffff;
 }
 
 .quick-btn.approve:hover {
-  background: linear-gradient(135deg, #45a049 0%, #3d8b40 100%);
+  background: rgba(124, 58, 237, 0.4);
   transform: translateY(-2px);
-  box-shadow: 0 4px 12px rgba(76, 175, 80, 0.3);
+  box-shadow: 0 4px 12px rgba(124, 58, 237, 0.2);
 }
 
 .quick-btn.reject {
-  background: linear-gradient(135deg, #f44336 0%, #d32f2f 100%);
-  color: white;
+  background: rgba(239, 68, 68, 0.1);
+  color: rgba(239, 68, 68, 1);
+  border-color: rgba(239, 68, 68, 0.2);
 }
 
 .quick-btn.reject:hover {
-  background: linear-gradient(135deg, #d32f2f 0%, #c62828 100%);
+  background: rgba(239, 68, 68, 0.15);
   transform: translateY(-2px);
-  box-shadow: 0 4px 12px rgba(244, 67, 54, 0.3);
+  box-shadow: 0 4px 12px rgba(239, 68, 68, 0.15);
 }
 
 .quick-btn:active {

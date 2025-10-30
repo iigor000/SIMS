@@ -215,10 +215,10 @@ const getImageUrl = (item) => {
                   </RouterLink>
                   <span class="item-type">{{ typeLabel(item) }}</span>
                 </div>
-              <RouterLink v-if="item.songwriters?.[0]?.id" :to="`/item/artist/${item.songwriters?.[0]?.id}`" class="popular-artist">
-                {{ item.songwriters?.[0]?.name || item.author || 'Nepoznati autor' }}
+              <RouterLink v-if="item.band?.id" :to="`/item/band/${item.band.id}`" class="popular-artist">
+                {{ item.band.name || 'Nepoznati bend' }}
               </RouterLink>
-              <div v-else class="popular-artist">{{ item.author || '' }}</div>
+              <div v-else class="popular-artist">{{ item.band?.name || '' }}</div>
             </div>
           </div>
           <button class="scroll-btn right" aria-label="Scroll right" @click="scrollContainer(popularListRef, 1)">›</button>
@@ -261,13 +261,13 @@ const getImageUrl = (item) => {
               </div>
               <span class="item-type">{{ typeLabel(item) }}</span>
             </div>
-            <p class="artist" v-if="item.songwriters?.[0]?.id || item.author">
+            <p class="artist">
               <RouterLink
-                v-if="item.songwriters?.[0]?.id"
-                :to="`/item/artist/${item.songwriters?.[0]?.id}`"
-                v-html="highlightMatch(item.songwriters?.[0]?.name || item.author || 'Nepoznati autor')"
+                v-if="item.band?.id"
+                :to="`/item/band/${item.band.id}`"
+                v-html="highlightMatch(item.band.name || 'Nepoznati bend')"
               ></RouterLink>
-              <span v-else class="artist-text">{{ item.author || '' }}</span>
+              <span v-else class="artist-text">{{ item.album?.name || '' }}</span>
             </p>
           </div>
         </div>

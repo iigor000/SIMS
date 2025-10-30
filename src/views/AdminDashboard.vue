@@ -11,7 +11,6 @@
 
       <!-- Editor Reviews Moderation Section -->
       <div class="moderation-section">
-        <router-link to="/admin/editor-reviews" class="section-link">
           <div class="section-header-card">
             <div class="header-content">
               <h2>🛡️ Moderacija Editor Recenzija</h2>
@@ -22,7 +21,6 @@
             </span>
             <span class="urgent-badge" v-if="editorReviewsCount > 0">NOVO</span>
           </div>
-        </router-link>
 
         <EditorReviewsPending
           :editor-reviews="editorReviews"
@@ -87,16 +85,20 @@ onMounted(async () => {
 
 .dashboard-header {
   margin-bottom: 3rem;
+  background: rgba(124, 58, 237, 0.1);
+  padding: 2rem;
+  border-radius: 12px;
+  border: 1px solid rgba(124, 58, 237, 0.2);
 }
 
 .dashboard-header h1 {
-  color: #4CAF50;
+  color: #ffffff;
   font-size: 2.5rem;
   margin-bottom: 0.5rem;
 }
 
 .dashboard-header p {
-  color: #666;
+  color: rgba(255, 255, 255, 0.9);
   font-size: 1.2rem;
 }
 
@@ -114,33 +116,36 @@ onMounted(async () => {
 }
 
 .card {
-  background: white;
+  background: rgba(124, 58, 237, 0.03);
   padding: 2rem;
   border-radius: 12px;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+  border: 1px solid rgba(124, 58, 237, 0.1);
+  box-shadow: 0 2px 8px rgba(124, 58, 237, 0.1);
   transition: all 0.3s ease;
 }
 
 .info-card:hover {
-  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.15);
+  box-shadow: 0 4px 16px rgba(124, 58, 237, 0.15);
   transform: translateY(-4px);
+  background: rgba(124, 58, 237, 0.05);
 }
 
 .card h2 {
-  color: #333;
+  color: #ffffff;
   margin-bottom: 1rem;
   font-size: 1.4rem;
 }
 
 .card p {
-  color: #666;
+  color: rgba(255, 255, 255, 0.9);
   line-height: 1.6;
 }
 
 .moderation-section {
-  background: #f5f5f5;
+  background: rgba(124, 58, 237, 0.03);
   padding: 2rem;
   border-radius: 12px;
+  border: 1px solid rgba(124, 58, 237, 0.1);
 }
 
 .section-link {
@@ -150,8 +155,8 @@ onMounted(async () => {
 }
 
 .section-header-card {
-  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-  color: white;
+  background: rgba(124, 58, 237, 0.2);
+  color: #ffffff;
   padding: 2rem;
   border-radius: 12px;
   display: flex;
@@ -161,12 +166,14 @@ onMounted(async () => {
   position: relative;
   overflow: hidden;
   transition: all 0.3s ease;
-  box-shadow: 0 4px 12px rgba(102, 126, 234, 0.3);
+  box-shadow: 0 2px 8px rgba(124, 58, 237, 0.1);
+  border: 1px solid rgba(124, 58, 237, 0.2);
 }
 
 .section-header-card:hover {
   transform: translateY(-4px);
-  box-shadow: 0 8px 24px rgba(102, 126, 234, 0.4);
+  box-shadow: 0 4px 16px rgba(124, 58, 237, 0.15);
+  background: rgba(124, 58, 237, 0.15);
 }
 
 .header-content {
@@ -186,8 +193,8 @@ onMounted(async () => {
 }
 
 .count-badge {
-  background: white;
-  color: #667eea;
+  background: rgba(196, 181, 253, 1);
+  color: rgba(124, 58, 237, 1);
   padding: 0.5rem 1rem;
   border-radius: 25px;
   font-weight: 700;
@@ -201,14 +208,15 @@ onMounted(async () => {
   position: absolute;
   top: 1rem;
   right: 1rem;
-  background: #ff5252;
-  color: white;
+  background: #ddd6fe;
+  color: rgba(124, 58, 237, 1);
   padding: 0.25rem 0.75rem;
   border-radius: 20px;
   font-size: 0.75rem;
   font-weight: 700;
   letter-spacing: 1px;
   animation: pulse 2s infinite;
+  box-shadow: 0 2px 4px rgba(124, 58, 237, 0.2);
 }
 
 @keyframes pulse {
@@ -217,8 +225,9 @@ onMounted(async () => {
     transform: scale(1);
   }
   50% {
-    opacity: 0.8;
+    opacity: 0.9;
     transform: scale(1.05);
+    box-shadow: 0 4px 8px rgba(124, 58, 237, 0.3);
   }
 }
 

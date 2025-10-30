@@ -20,7 +20,7 @@ const router = createRouter({
       component: () => import("../views/AboutView.vue"),
       meta: { requiresAuth: true },
     },
-        {
+    {
       path: "/item/:type/:id",
       name: "item-details",
       component: () => import("../views/ItemDetailsView.vue"),
@@ -39,13 +39,13 @@ const router = createRouter({
       component: () => import("../views/AdminDashboard.vue"),
       meta: { requiresAuth: true, requiredRole: 'admin' },
     },
-        {
+    {
       path: "/moderation",
       name: "moderation",
       component: () => import("../views/ModerationView.vue"),
       meta: { requiresAuth: true, requiredRole: ['editor', 'admin'] },
     },
-        {
+    {
       path: "/edit-review/:reviewId",
       name: "edit-review",
       component: () => import("../views/EditReviewView.vue"),
@@ -64,14 +64,8 @@ const router = createRouter({
       component: () => import("../views/AddItemView.vue"),
       meta: { requiresAuth: true, requiredRole: ['editor', 'admin'] },
     },
-    {
-      path: "/publish",
-      name: "publish",
-      component: () => import("../views/EditorDashboard.vue"),
-      meta: { requiresAuth: true, requiredRole: 'editor' },
-    },
     // User routes
-        {
+    {
       path: "/my-reviews",
       name: "my-reviews",
       component: () => import("../views/MyReviewsView.vue"),
@@ -132,7 +126,7 @@ router.beforeEach((to, from, next) => {
               } else {
                 next('/');
               }
-            } 
+            }
             // Ako je single role string ('admin', 'editor', 'user')
             else if (userData && userData.role === requiredRole) {
               next();

@@ -188,76 +188,87 @@ watch(
 
 <style scoped>
 .review-list {
-  margin-top: 20px;
+  margin-top: 24px;
 }
 
 .loading, .empty-state {
   text-align: center;
   padding: 40px;
-  color: #666;
+  color: #ddd6fe;
+  font-size: 1.1rem;
 }
 
 .empty-state .prompt {
-  margin-top: 10px;
-  font-size: 0.9rem;
-  color: #888;
+  margin-top: 12px;
+  font-size: 1rem;
+  color: #c4b5fd;
 }
 
 .reviews-stats {
   display: flex;
-  gap: 30px;
-  margin-bottom: 25px;
-  padding: 20px;
-  background: #f8f9fa;
-  border-radius: 8px;
+  gap: 32px;
+  margin-bottom: 28px;
+  padding: 24px;
+  background: rgba(124,58,237,0.08);
+  border: 1px solid rgba(124,58,237,0.16);
+  border-radius: 12px;
+  box-shadow: 0 4px 12px rgba(0,0,0,0.1);
 }
 
 .stat {
   text-align: center;
+  flex: 1;
 }
 
 .stat-number {
   display: block;
-  font-size: 1.5rem;
+  font-size: 1.75rem;
   font-weight: bold;
-  color: #007bff;
+  color: #ffffff;
+  margin-bottom: 4px;
 }
 
 .stat-label {
   display: block;
-  font-size: 0.8rem;
-  color: #666;
+  font-size: 0.9rem;
+  color: #ddd6fe;
   text-transform: uppercase;
+  letter-spacing: 0.05em;
   margin-top: 4px;
 }
 
 .reviews {
   display: flex;
   flex-direction: column;
-  gap: 16px;
+  gap: 20px;
 }
 
 .load-more {
   text-align: center;
-  margin-top: 30px;
+  margin-top: 36px;
 }
 
 .load-more-btn {
-  background: #007bff;
-  color: white;
-  border: none;
-  padding: 12px 24px;
-  border-radius: 4px;
+  background: rgba(124,58,237,0.1);
+  color: #ffffff;
+  border: 1px solid rgba(124,58,237,0.2);
+  padding: 12px 28px;
+  border-radius: 8px;
   cursor: pointer;
-  transition: background-color 0.2s;
+  transition: all 0.2s ease;
+  font-size: 1rem;
+  font-weight: 500;
 }
 
 .load-more-btn:hover:not(:disabled) {
-  background: #0056b3;
+  background: rgba(124,58,237,0.2);
+  transform: translateY(-1px);
 }
 
 .load-more-btn:disabled {
-  background: #6c757d;
+  background: rgba(124,58,237,0.05);
+  border-color: rgba(124,58,237,0.1);
+  color: #a899c2;
   cursor: not-allowed;
 }
 
