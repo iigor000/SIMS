@@ -417,20 +417,21 @@ const saveItem = async () => {
     if (userStore.userRole === "editor") {
       const reviewRef = push(dbRef(dbInstance, "reviews"));
       await set(reviewRef, {
+        authorRole: "editor",
         itemId: id,
         itemName: formData.value.name,
+        mediaType: "digital",
         itemType: itemType.value,
         rating: formData.value.rating || null,
         reviewText: formData.value.reviewText,
-        status: "pending",
+        status: 'pending',
         createdAt: now,
+        userDisplayName: userStore.user?.displayName || "",
         userId: userStore.user?.uid || "",
-        createdBy: userStore.user?.uid || "",
         viewCount: 0,
       });
     }
 
-    // 🟩 upis novog itema
     await set(newItemRef, newItem);
 
     success.value = true;
